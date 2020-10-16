@@ -28,7 +28,7 @@ def main():
     
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('index.html', time=date_time_str)
+    return render_template('setup.html', time=date_time_str)
 
 
 @app.route('/static/<path:path>')
