@@ -5,7 +5,8 @@ from datetime import datetime
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
-SECRET_KEY = 'F87mberp7gfs3DckAZ2LesqDx8x8GeGXu8rv7fS4tDWDRhAKgC7P3iMLBkkudV4'
+SECRET_KEY = 'SOME_SECRET_KEY!'
+
 
 # Init the server
 app = Flask(__name__,  static_url_path=STATIC_URL_PATH)
@@ -13,7 +14,9 @@ app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
 
+
 ### STATIC FLASK PART ###
+
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/')
 def main():
