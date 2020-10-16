@@ -1,13 +1,13 @@
-# https://stackoverflow.com/a/62354885/5559867
 from typing import Dict, Tuple, Set, List
 from pathlib import Path
-import mlrose
+# https://stackoverflow.com/a/62354885/5559867  # noqa E402
+import six  # noqa E402
+import sys  # noqa E402
+sys.modules['sklearn.externals.six'] = six  # noqa E402
+import mlrose  # noqa E402
 import numpy as np
 import skimage.io
 import skimage.graph
-import six
-import sys
-sys.modules['sklearn.externals.six'] = six
 
 
 class Pathplanner:
