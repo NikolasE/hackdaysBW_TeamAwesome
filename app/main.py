@@ -25,9 +25,9 @@ def build_map(coin_list, location, item_list, path_list):
     svg_map = ""
 
     # Path
-    path_str = """<path d="M {0} {1}""".format(location[0], location[1])
+    path_str = """<path d="M {0} {1}""".format(location[1], location[0])
     for path in path_list:
-        path_str = path_str + "L {} {}".format(path[0], path[1])
+        path_str = path_str + "L {} {}".format(path[1], path[0])
 
     path_str = path_str + """" stroke="black" fill="transparent" style="stroke:gray;stroke-width:10"/>"""
 
@@ -53,7 +53,8 @@ def build_map(coin_list, location, item_list, path_list):
         svg_map = svg_map + """
         <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" />
 	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">{4}</text>
-	    """.format(item[0],item[1],item[0]-9, item[1]+10, counter)
+	    """.format(item[1],item[0],item[1]-9, item[0]+10, counter)
+        counter = counter +1
 
     svg_end = """</svg>"""
     svg = svg_map + svg_end
@@ -62,11 +63,9 @@ def build_map(coin_list, location, item_list, path_list):
 
 user_id = 0
 
-
 @dataclass
 class UserData:
     einkaufszettel: list
-
 
 user_datas = {
     # format: USER_ID: UserData
@@ -101,10 +100,11 @@ def main():
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
 
 
-def _get_path_for_einkaufszettel():
+def _get_path_for_einkaufszettel(user_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
     locs = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
+    locs = [user_location] + locs
     print(f"Item locations are: {locs}")
     pp = Pathplanner(map_image_path='pathplanning/map.png', product_locations=locs)
     path = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...]
@@ -115,13 +115,12 @@ def _get_path_for_einkaufszettel():
 @app.route('/navigation')
 def navigation():
     coin_list = [(100, 200), (200, 300)]
-    location = (60, 850)
-    item_list = [(200, 700), (200, 500)]
-    path_list = [(100, 800), (100, 200)]
+    user_location = (850, 60) #y,x
+    item_list = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
 
-    path = _get_path_for_einkaufszettel()
+    path_list = _get_path_for_einkaufszettel(user_location)
 
-    svg = build_map(coin_list, location, item_list, path_list)
+    svg = build_map(coin_list, user_location, item_list, path_list)
     return render_template('navigation.html', svg=svg)
 
 
