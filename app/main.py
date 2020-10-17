@@ -7,6 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from google.cloud import vision
 import binascii
+import re
 
 from map import build_map
 from product_locations import product_locations
@@ -112,9 +113,6 @@ def main():
         #{'id': "0173628", 'text': "Tomaten", url='/static/tomaten.jpg'}
     ]
 
-    user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
-    print(f'user data is now {user_datas}')
-
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
@@ -162,7 +160,6 @@ def startseite():
     return render_template('startseite.html')
 
 
-# Temp
 client = vision.ImageAnnotatorClient()
 
 import re
@@ -240,7 +237,14 @@ def message_recieved(data):
     Using emit will send the Data to all client which are connencted...
     '''
     print(data)
-    emit('server_client_namespace', data)
+
+    if data['inbasket'] == 1:
+        user_datas[user_id].einkaufszettel.append(data['product'])
+    else:
+        if data['product'] in user_datas[user_id].einkaufszettel:
+            user_datas[user_id].einkaufszettel.remove(data['product'])
+
+    #emit('server_client_namespace', data)
 
 
 def _get_ssl_context():
