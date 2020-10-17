@@ -1,3 +1,4 @@
+/*
 function sleep(milliseconds) {
   const date = Date.now();
   let currentDate = null;
@@ -25,3 +26,34 @@ $(document).ready(function () {
   
 
 });
+*/
+window.addEventListener("load", function() {
+    rotateDirection(0);
+    window.scrollTo(0,document.body.scrollHeight);
+  });
+
+
+//Kompass
+if (window.DeviceOrientationEvent) {
+  // Listen for the deviceorientation event and handle the raw data
+  window.addEventListener('deviceorientation', function(eventData) {
+    var compassdir;
+
+    if(event.webkitCompassHeading) {
+      // Apple works only with this, alpha doesn't work
+      compassdir = event.webkitCompassHeading;
+    } else {
+    compassdir = event.alpha;
+    }
+        rotateDirection(compassdir);
+  });
+}
+function rotateDirection(deg) {
+    var svg = document.getElementById('location');
+    if (svg) {
+        svg.setAttribute('transform','rotate('+deg+', 60, 850)');
+        console.log("rotation");
+    }else{
+        console.log("noElement");
+    }
+}
