@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import json
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
+from google.cloud import vision
+import binascii
 
 from map import build_map
 from product_locations import product_locations
@@ -121,7 +123,6 @@ def _get_path_for_einkaufszettel(user_location):
     return path, route
 
 
-# Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
     coin_list = [(100, 200), (200, 300)]
@@ -132,6 +133,31 @@ def navigation():
 
     svg = build_map(coin_list, user_location, item_locations, path_list)
     return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
+
+
+@app.route('/video')
+def video():
+    return render_template('video.html')
+
+
+# Temp
+client = vision.ImageAnnotatorClient()
+
+@app.route('/whereami', methods=['POST'])
+def whereami():
+
+    base64 = request.form.get('base64')[22:]
+    print(base64)
+
+    response = client.annotate_image(
+        {'image': {'content': binascii.a2b_base64(base64)}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+
+    #response = client.annotate_image(
+    #    {'image': {'content': base64.encode()}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+
+    print(response)
+
+    return redirect("/video", code=302)
 
 
 @app.route('/static/<path:path>')
