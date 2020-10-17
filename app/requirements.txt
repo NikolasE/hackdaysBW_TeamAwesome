@@ -3,3 +3,4 @@ flask_socketio
 mlrose
 scikit-image
 google-cloud-vision
+tqdm
