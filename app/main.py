@@ -90,7 +90,6 @@ def build_map():
 
 
 =======
->>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
@@ -101,10 +100,7 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-<<<<<<< HEAD
-=======
 
->>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('setup.html', time=date_time_str)
@@ -142,10 +138,6 @@ def message_recieved(data):
 
 # Actually Start the App
 if __name__ == '__main__':
-<<<<<<< HEAD
-    """ Run the app. """    
-    socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
-=======
     """ Run the app. """
-    socketio.run(app, port=8000, debug=True)
->>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
+    socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
+
