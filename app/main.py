@@ -103,24 +103,26 @@ def main():
 def _get_path_for_einkaufszettel(user_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
-    locs = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
+    product_ids = [id for id in user_datas[user_id].einkaufszettel]
+    locs = [product_locations[id] for id in product_ids]
     locs = [user_location] + locs
     print(f"Item locations are: {locs}")
     pp = Pathplanner(map_image_path='pathplanning/map.png', product_locations=locs)
-    path = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...]
-    print(f"calculated path is {path}")
-    return path
+    path, route_indices = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
+    route = [product_ids[id] for id in route_indices[1:]]  # indices to product ids
+    print(f"calculated path is {path} and route is {route}")
+    return path, route
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
     coin_list = [(100, 200), (200, 300)]
-    user_location = (850, 60) #y,x
-    item_list = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
+    user_location = (850, 60)  # y,x
 
-    path_list = _get_path_for_einkaufszettel(user_location)
+    path_list, item_list = _get_path_for_einkaufszettel(user_location)
+    item_locations = [product_locations[id] for id in item_list]
 
-    svg = build_map(coin_list, user_location, item_list, path_list)
+    svg = build_map(coin_list, user_location, item_locations, path_list)
     return render_template('navigation.html', svg=svg)
 
 
