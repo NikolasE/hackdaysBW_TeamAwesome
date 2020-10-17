@@ -14,7 +14,10 @@
 
 <body>
 
-    <img src="/map/test/map.svg" width="455" height="1000" >
+    <div>
+        {{ svg|safe }}
+    </div>
+
     <div>Richtung: <span id="direction"></span></div>
 </body>
 </html>

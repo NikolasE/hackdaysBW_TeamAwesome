@@ -17,9 +17,10 @@ socketio = SocketIO(app, logger=False)
 ### helper functions ###
 def build_map():
     svg_map = """
-<svg width="455" height="1000" xmlns="http://www.w3.org/2000/svg">>
+<svg id="svg-object" width="455" height="1000" xmlns="http://www.w3.org/2000/svg">
 <rect width="500" height="1000" style="fill:white;stroke-width:3;stroke:rgb(0,0,0)" />
-<!-- Kasse, Eingang-->
+
+<!-- Kasse, Eingang -->
 <rect x="0" y="900" width="200" height="150" style="fill:black;stroke:black;stroke-width:5;fill-opacity:0.3;stroke-opacity:1" />
 <rect x="250" y="800" width="2500" height="100" style="fill:black;stroke:black;stroke-width:5;fill-opacity:0.3;stroke-opacity:1" />
 <text x="25" y="960" fill="#003278" font-size="2.5em">Eingang</text>
@@ -79,16 +80,15 @@ def build_map():
 <rect x="100" y="825" width="100" height="25" style="fill:#003278;stroke:black;stroke-width:5;fill-opacity:0.5;stroke-opacity:1" />
     
 <!-- Location -->
-<polygon points="60,850 20,780 100,780" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
-<circle cx="60" cy="850" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" id="location" />    
-    """
+<polygon points="60,850 20,780 100,780" id="location" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
+<circle cx="60" cy="850" r="20" stroke="#003278" stroke-width="5" fill="#ffe300"  />    
+"""
 
     svg_end = """</svg>"""
-
     svg = svg_map + svg_end
+
     return svg
-
-
+1
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
@@ -99,22 +99,21 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-<<<<<<< HEAD
+
     pizzas = [{'name': 'pizza1','text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
            {'name': 'pizza2','text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
            {'name': 'pizza3','text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
            {'name': 'pizza4','text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
            {'name': 'pizza5','text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'}]
-=======
 
->>>>>>> 46bf46e952af7fa11dc317d3fafb5da64037a657
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str,pizzas=pizzas)
 
 @app.route('/map/')
 def map():
-    return render_template('index.html')
+    svg = build_map()
+    return render_template('index.html', svg=svg)
 
 @app.route('/map/<user>/map.svg')
 def serve_map(user):
@@ -122,7 +121,8 @@ def serve_map(user):
     Das hier sendet den statischen content wie js bilder, mp4 und so....
     '''
     svg = build_map()
-    return Response(svg, mimetype='image/svg+xml')
+    #return Response(svg, mimetype='image/svg+xml')
+    return Response(svg)
 
 
 @app.route('/static/<path:path>')

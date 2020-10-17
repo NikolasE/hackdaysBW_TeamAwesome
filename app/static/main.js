@@ -38,6 +38,11 @@ $(document).ready(function() {
 });
 */
 
+window.addEventListener("load", function() {
+    rotateDirection(0);
+  });
+
+
 //Kompass
 if (window.DeviceOrientationEvent) {
   // Listen for the deviceorientation event and handle the raw data
@@ -47,20 +52,18 @@ if (window.DeviceOrientationEvent) {
     if(event.webkitCompassHeading) {
       // Apple works only with this, alpha doesn't work
       compassdir = event.webkitCompassHeading;
+    } else {
+    compassdir = event.alpha;
     }
-    else compassdir = event.alpha;
-
-    document.getElementById("direction").innerHTML = Math.ceil(compassdir);
-
+        rotateDirection(compassdir);
   });
 }
-
-//rotate
-function rotateDirection(idStr, deg) {
-    var domElemnt = document.getElementById("location");
-    if (domElemnt) {
-        domElemnt.style.transform = "rotate(50deg)";
-        console.log("rotation")
+function rotateDirection(deg) {
+    var svg = document.getElementById('location');
+    if (svg) {
+        svg.setAttribute('transform','rotate('+deg+', 60, 850)');
+        console.log("rotation");
+    }else{
+        console.log("noElement");
     }
 }
-rotateDirection("location", 5);
