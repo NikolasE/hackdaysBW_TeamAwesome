@@ -113,10 +113,15 @@ def main():
         {'id': "0173628", 'text': "Tomaten", 'url': '/static/tomaten.jpg'}
     ]
 
-    for item in pizzas:
+    for counter, item in enumerate(pizzas):
         if item['id'] in user_datas[user_id].einkaufszettel:
-            item["background"] = '#ffe10050'
-            item["inbasket"] = 'true'
+            pizzas[counter]["class"] = 'bg-warning'
+            pizzas[counter]["inbasket"] = 'true'
+        else:
+            pizzas[counter]["class"] = 'swatch-400'
+            pizzas[counter]["inbasket"] = 'false'
+
+    print(pizzas)
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")

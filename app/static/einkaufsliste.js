@@ -19,12 +19,17 @@ function in_my_basket(id) {
 
 
   if (document.getElementById(id+"_selected").innerHTML == "true") {
-    document.getElementById(id).style.background = "#dee2e6";
+    element = document.getElementById(id+"_selected")
+    element.parentElement.classList.remove("bg-warning");
+    element.parentElement.classList.add("swatch-400");
+    element.innerHTML = "false";
     socket.emit('client_server_namespace', { 'product': id, 'inbasket': 0 });
-    document.getElementById(id+"_selected").innerHTML = "false";
+
   } else {
-    document.getElementById(id+"_selected").innerHTML = "true";
-    document.getElementById(id).style.background = "#ffe10050";
+    element = document.getElementById(id+"_selected")
+    element.parentElement.classList.remove("swatch-400");
+    element.parentElement.classList.add("bg-warning");
+    element.innerHTML = "true";
     socket.emit('client_server_namespace', { 'product': id, 'inbasket': 1 });
 
   }
