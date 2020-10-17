@@ -89,11 +89,13 @@ def main():
 
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': 1, 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-        {'id': 2, 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': 3, 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': 4, 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': 5, 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': "1", 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'id': "2", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': "3", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': "4", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': "5", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': "0003376", 'text': 'Balisto', 'url': '/static/pizza5.jpg'},
+        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/pizza5.jpg'},
     ]
 
     user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
@@ -117,6 +119,7 @@ def _get_path_for_einkaufszettel(user_location):
     route = [product_ids[id-1] for id in route_indices[1:]]  # indices to product ids
     print(f"calculated path is {path} and route is {route}")
     return path, route
+
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
