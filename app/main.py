@@ -91,13 +91,20 @@ def main():
 
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': "1", 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-        {'id': "2", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': "3", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': "4", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': "5", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
-        {'id': "0003376", 'text': 'Balisto', 'url': '/static/pizza5.jpg'},
-        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/pizza5.jpg'},
+        {'id': "0116393", 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
+        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
+        {'id': "0000305", 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
+        {'id': "0119704", 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
+        {'id': "0001847", 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
+        {'id': "0003376", 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
+        {'id': "0136673", 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
+        {'id': "0003430", 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
+        {'id': "0047627", 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
+        {'id': "0001375", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': "0034957", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': "0057475", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': "0098066", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
+        {'id': "0122344", 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
     ]
 
     user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
@@ -147,7 +154,7 @@ def video():
 
 
 # Temp
-client = vision.ImageAnnotatorClient()
+#client = vision.ImageAnnotatorClient()
 
 @app.route('/whereami', methods=['POST'])
 def whereami():
