@@ -92,25 +92,25 @@ def main():
 
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': "0116393", 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
-        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
-        {'id': "0000305", 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
-        {'id': "0119704", 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
-        {'id': "0001847", 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
-        {'id': "0003376", 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
-        {'id': "0136673", 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
-        {'id': "0003430", 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
-        {'id': "0047627", 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
-        {'id': "0001375", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': "0034957", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': "0057475", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': "0098066", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
-        {'id': "0122344", 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
-        {'id': "0410170", 'text': "Hefe", 'url': '/static/hefe.jpg'},
-        {'id': "0212833", 'text': "Formil activ", 'url': '/static/formil.png'},
-        {'id': "0826492", 'text': "Fleischwurst", 'url': '/static/fleischwurst.png'},
-        {'id': "0926460", 'text': "Vollmilch", 'url': '/static/milch.png'},
-        {'id': "0173628", 'text': "Tomaten", 'url': '/static/tomaten.jpg'}
+        {'id': "0116393",'price': '1,44 €' 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
+        {'id': '0007873', 'price': '1,93 €', 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
+        {'id': '0000305', 'price': '1,92 €', 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
+        {'id': '0119704', 'price': '1,32 €', 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
+        {'id': '0001847', 'price': '2,22 €', 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
+        {'id': '0003376', 'price': '1,73 €', 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
+        {'id': '0136673', 'price': '3,21 €', 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
+        {'id': '0003430', 'price': '0,58 €', 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
+        {'id': '0047627', 'price': '1,56 €', 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
+        {'id': '0001375', 'price': '1,95 €', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': '0034957', 'price': '1,87 €', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': '0057475', 'price': '2,57 €', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': '0098066', 'price': '2,12 €', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
+        {'id': '0122344', 'price': '1,98 €', 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
+        {'id': '0410170', 'price': '0,79 €', 'text': 'Hefe', 'url': '/static/hefe.jpg'},
+        {'id': '0212833', 'price': '7,43 €', 'text': 'Formil activ', 'url': '/static/formil.png'},
+        {'id': '0826492', 'price': '2,46 €', 'text': 'Fleischwurst', 'url': '/static/fleischwurst.png'},
+        {'id': '0926460', 'price': '1,23 €', 'text': 'Vollmilch', 'url': '/static/milch.png'},
+        {'id': '0173628', 'price': '2,50 € / 100 gr.', 'text': 'Tomaten', 'url': '/static/tomaten.jpg'}
     ]
 
     for counter, item in enumerate(pizzas):
