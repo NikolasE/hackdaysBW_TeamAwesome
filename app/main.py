@@ -22,6 +22,11 @@ app = Flask(__name__, static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
+kasse_location = (999, 400)
+pathplanning_locations = list(product_locations.values()) + [kasse_location]
+pathplanner = Pathplanner(map_image_path='pathplanning/map.png', locations=pathplanning_locations)
+
+
 ### helper functions ###
 
 def build_map(coin_list, location, item_list, path_list):
@@ -131,15 +136,13 @@ def main():
 def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
-    product_ids = [id for id in user_datas[user_id].einkaufszettel]
-    locs = [product_locations[id] for id in product_ids]
-    locs = locs + [kasse_location]
-    print(f"Item locations are: {locs}")
-    pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
-    end_id = len(locs)  # kasse location
-    path, route_indices = pp.get_path(user_location, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
+    product_ids = [list(product_locations.keys()).index(id) for id in user_datas[user_id].einkaufszettel]  # TODO plus kasse
+    end_id = len(product_ids)-1  # kasse location
+    path, route_indices = pathplanner.get_path(user_location, product_ids, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
+    print(route_indices)
     route_indices = route_indices[1:-1]
-    route = [product_ids[id-1] for id in route_indices]  # indices to product ids
+    # route = [product_ids[id-1] for id in route_indices]  # indices to product ids
+    route = [list(product_locations.keys())[id-1] for id in route_indices]
 
     print(f"calculated path is {path} and route is {route}")
     return path, route
@@ -282,6 +285,7 @@ def message_recieved(data):
             user_datas[user_id].einkaufszettel.remove(data['product'])
 
     #emit('server_client_namespace', data)
+    print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
 
 
 def _get_ssl_context():
