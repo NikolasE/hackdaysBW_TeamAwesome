@@ -138,9 +138,5 @@ def message_recieved(data):
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-<<<<<<< HEAD
     socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
 
-=======
-    socketio.run(app, port=8000, host='0.0.0.0', debug=True)
->>>>>>> b455d3f... run on 0.0.0.0:wq
