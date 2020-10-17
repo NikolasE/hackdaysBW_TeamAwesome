@@ -92,7 +92,7 @@ def main():
 
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': "0116393",'price': '1,44 €' 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
+        {'id': "0116393",'price': '1,44 €', 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
         {'id': '0007873', 'price': '1,93 €', 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
         {'id': '0000305', 'price': '1,92 €', 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
         {'id': '0119704', 'price': '1,32 €', 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
