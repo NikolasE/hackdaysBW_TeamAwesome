@@ -21,6 +21,7 @@ $(document).ready(function () {
     sleep(200);
     location.href = "/s";
   }
- 
+
+  
 
 });
