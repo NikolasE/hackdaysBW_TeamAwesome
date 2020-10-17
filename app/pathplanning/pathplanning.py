@@ -87,11 +87,15 @@ class Pathplanner:
         """Do the actual travelling salesperson."""
         dist_list.sort(key=lambda x: x[0])
         length = int(self._get_max_index_value_in_dists(dist_list) + 1)
-        fitness_dists = mlrose.TravellingSales(distances=dist_list)
-        problem_fit = mlrose.TSPOpt(
-            length=length, fitness_fn=fitness_dists, maximize=False)
-        best_state, best_fitness = mlrose.genetic_alg(
-            problem_fit, mutation_prob=0.2, max_attempts=50)
+        try:
+            fitness_dists = mlrose.TravellingSales(distances=dist_list)
+            problem_fit = mlrose.TSPOpt(
+                length=length, fitness_fn=fitness_dists, maximize=False)
+            best_state, best_fitness = mlrose.genetic_alg(
+                problem_fit, mutation_prob=0.2, max_attempts=50)
+        except Exception:
+            print(f"tsp failed. dist_list: {dist_list}")
+            raise
         return best_state
 
     def _roll_route(self, start_id: int, end_id: int, route: List[int]) -> List[int]:
@@ -133,10 +137,15 @@ class Pathplanner:
         assert selected_product_ids[0] == 0
         route = np.array(route)
         route[route.argmax()] = -1  # set max value in array to -1
-        return [selected_product_ids[route_point] for route_point in route if route_point != -1]
+        try:
+            return [selected_product_ids[route_point] for route_point in route if route_point != -1]
+        except Exception:
+            print(f"_map_to_selected_product_id_indices({selected_product_ids}, {route}) failed.")
+            raise
 
     def get_path(self, user_loc, selected_product_ids, end_at_id):
         assert end_at_id in selected_product_ids, f"end id {end_at_id} must be within {selected_product_ids}"
+        end_at_id = list(selected_product_ids).index(end_at_id)  # transform to tsp ids
         if self.num_products == 0:
             return [], []
         if 0 not in selected_product_ids:
