@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from map import build_map
+from product_locations import product_locations
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -29,12 +30,14 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
+
+    # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'name': 'pizza1', 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-        {'name': 'pizza2', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'name': 'pizza3', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'name': 'pizza4', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'name': 'pizza5', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': 1, 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'id': 2, 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': 3, 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': 4, 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': 5, 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
     ]
 
     now = datetime.now()
