@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import json
 from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
@@ -20,14 +19,9 @@ app = Flask(__name__, static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
-coin_list = [(100, 200), (200, 300)]
-location = (60,850)
-item_list = [(200,700),(200,500)]
-path_list = [(100,800),(100,200)]
-
 ### helper functions ###
 
-def build_map():
+def build_map(coin_list, location, item_list, path_list):
     svg_map = ""
 
     # Path
@@ -54,11 +48,12 @@ def build_map():
     """.format(location[0],location[1], location[0]-40, location[1]-100, location[0]+40, location[1]-100)
 
     # Items
+    counter = 0
     for item in item_list:
         svg_map = svg_map + """
         <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" />
-	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">1</text>
-	    """.format(item[0],item[1],item[0]-9, item[1]+10)
+	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">{4}</text>
+	    """.format(item[0],item[1],item[0]-9, item[1]+10, counter)
 
     svg_end = """</svg>"""
     svg = svg_map + svg_end
@@ -119,9 +114,14 @@ def _get_path_for_einkaufszettel():
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
+    coin_list = [(100, 200), (200, 300)]
+    location = (60, 850)
+    item_list = [(200, 700), (200, 500)]
+    path_list = [(100, 800), (100, 200)]
+
     path = _get_path_for_einkaufszettel()
 
-    svg = build_map()
+    svg = build_map(coin_list, location, item_list, path_list)
     return render_template('navigation.html', svg=svg)
 
 
