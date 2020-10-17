@@ -154,8 +154,8 @@ def message_recieved(data):
 
 
 def _get_ssl_context():
-    fullchain = Path('/etc/letsencrypt/live/mdminhazulhaque.io/fullchain.pem')
-    privkey = Path('/etc/letsencrypt/live/mdminhazulhaque.io/privkey.pem')
+    fullchain = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/fullchain.pem')
+    privkey = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/privkey.pem')
     if fullchain.is_file() and privkey.is_file():
         ssl_context = (fullchain, privkey)
     else:
