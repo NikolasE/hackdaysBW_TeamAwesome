@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 
