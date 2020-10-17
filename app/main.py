@@ -163,7 +163,7 @@ def startseite():
 
 
 # Temp
-#client = vision.ImageAnnotatorClient()
+client = vision.ImageAnnotatorClient()
 
 import re
 @app.route('/whereami', methods=['POST', 'GET'])
