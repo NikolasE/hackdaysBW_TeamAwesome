@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 
@@ -104,6 +104,9 @@ def main():
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('setup.html', time=date_time_str)
 
+@app.route('/map/')
+def map():
+    return render_template('index.html')
 
 @app.route('/map/<user>/map.svg')
 def serve_map(user):
