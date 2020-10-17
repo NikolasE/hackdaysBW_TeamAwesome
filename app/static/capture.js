@@ -55,6 +55,7 @@
 
     startbutton.addEventListener('click', function(ev){
       document.getElementById('base64').value=takepicture();
+      video.pause();
       ev.preventDefault();
       document.getElementById("whereami").submit();
     }, false);
@@ -90,7 +91,7 @@
       var data = canvas.toDataURL('image/png');
       photo.setAttribute('src', data);
 
-
+      streaming = false
       return data;
     } else {
       clearphoto();

@@ -194,8 +194,6 @@ def get_left_right_direction(detected_tags, goal_tag):
         
 
 
-
-
 import re
 
 @app.route('/whereami', methods=['POST', 'GET'])
@@ -208,13 +206,16 @@ def whereami():
             {'image': {'content': binascii.a2b_base64(base64)} }
         )
         texts = response.text_annotations
+        print(texts)
         list_id_numbers = []
+        list_boundaries = []
         for text in texts:
+            print(text)
             x = re.search(r"(\d{7})\D",str(text))
             if x != None:
+                list_boundaries
                 list_id_numbers.append(re.sub('\D', '', x.group()))
 
-        # [0003376, 0000305, 0007873, 0119704, 0001847]
         if list_id_numbers == 0:
             return render_template('video.html')
 
