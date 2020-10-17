@@ -18,7 +18,7 @@ while true; do
 
         git pull --rebase
 
-        kill $SERVER_PID
+        kill $SERVER_PID || true
         ./main.py &
         SERVER_PID=$!
     fi
