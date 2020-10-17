@@ -4,6 +4,7 @@ import json
 from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
+from pathlib import Path
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -152,7 +153,17 @@ def message_recieved(data):
     emit('server_client_namespace', data)
 
 
+def _get_ssl_context():
+    fullchain = Path('/etc/letsencrypt/live/mdminhazulhaque.io/fullchain.pem')
+    privkey = Path('/etc/letsencrypt/live/mdminhazulhaque.io/privkey.pem')
+    if fullchain.is_file() and privkey.is_file():
+        ssl_context = (fullchain, privkey)
+    else:
+        ssl_context = 'adhoc'
+    return ssl_context
+
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-    socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
+
+    socketio.run(app, ssl_context=_get_ssl_context(), host="0.0.0.0", port=8000, debug=True)
