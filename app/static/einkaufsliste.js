@@ -11,13 +11,18 @@ function gotonavigator() {
   location.href = "/navigation";
 }
 function in_my_basket(id) {
-  console.log(document.getElementById(id).style.background)
-  if (document.getElementById(id).style.background == "#ffe10050") {
+  console.log(id);
+  val = document.getElementById("overlay").style.background;
+  console.log(val);
 
+
+  if (document.getElementById(id).style.background == "rgba(255, 225, 0, 0.314) none repeat scroll 0% 0%") {
     document.getElementById(id).style.background = "#dee2e6";
-
+    socket.emit('client_server_namespace', { 'product': id, 'inbasket': 0 });
   } else {
     document.getElementById(id).style.background = "#ffe10050";
+    socket.emit('client_server_namespace', { 'product': id, 'inbasket': 1 });
+
   }
 
 }
@@ -29,17 +34,5 @@ $(document).ready(function () {
   var socket = io.connect('http://localhost:8000/', { secure: true });
 
   document.getElementById("overlay").style.display = "none";
-
-
-
-
-  // connect a button press event to the button2
-  document.getElementById("start_programme").onclick = function () {
-    console.log("Start Programme Button pressed");
-    socket.emit('client_server_namespace', { 'page': 1, 'button': 1 });
-    sleep(200);
-    location.href = "/s";
-  }
-
 
 });
