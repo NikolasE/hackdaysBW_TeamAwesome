@@ -108,17 +108,18 @@ def main():
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
 
 
-def _get_path_for_einkaufszettel(user_location):
+def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
     product_ids = [id for id in user_datas[user_id].einkaufszettel]
     locs = [product_locations[id] for id in product_ids]
-    locs = [user_location] + locs
+    locs = [user_location] + locs + [kasse_location]
     print(f"Item locations are: {locs}")
     pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
     path, route_indices = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
 
-    route = [product_ids[id-1] for id in route_indices[1:]]  # indices to product ids
+    route = [product_ids[id-1] for id in route_indices]  # indices to product ids
+
     print(f"calculated path is {path} and route is {route}")
     return path, route
 
@@ -127,8 +128,9 @@ def _get_path_for_einkaufszettel(user_location):
 def navigation():
     coin_list = [(100, 200), (200, 300)]
     user_location = (850, 60)  # y,x
+    kasse_location = (999, 400)
 
-    path_list, item_list = _get_path_for_einkaufszettel(user_location)
+    path_list, item_list = _get_path_for_einkaufszettel(user_location, kasse_location)
     item_locations = [product_locations[id] for id in item_list]
 
     svg = build_map(coin_list, user_location, item_locations, path_list)
