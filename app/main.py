@@ -1,5 +1,7 @@
-import json 
-from flask import Flask, render_template, request, Response
+#!/usr/bin/env python3
+
+import json
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 
@@ -11,7 +13,6 @@ SECRET_KEY = 'SOME_SECRET_KEY!'
 app = Flask(__name__,  static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
-
 
 ### helper functions ###
 def build_map():
@@ -88,6 +89,8 @@ def build_map():
     return svg
 
 
+=======
+>>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
@@ -98,9 +101,13 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('index.html', time=date_time_str)
+    return render_template('setup.html', time=date_time_str)
 
 
 @app.route('/map/<user>/map.svg')
@@ -122,7 +129,7 @@ def serve_static(path):
 
 ### SOCKET FLASK PART ###
 # Receive a message from the front end HTML
-@socketio.on('client_server_namespace')   
+@socketio.on('client_server_namespace')
 def message_recieved(data):
     '''
     This receaves dynamic content which can then be used for anything else...
@@ -130,10 +137,15 @@ def message_recieved(data):
     Using emit will send the Data to all client which are connencted...
     '''
     print(data)
-    emit('server_client_namespace', data)    
+    emit('server_client_namespace', data)
 
 
 # Actually Start the App
 if __name__ == '__main__':
+<<<<<<< HEAD
     """ Run the app. """    
     socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
+=======
+    """ Run the app. """
+    socketio.run(app, port=8000, debug=True)
+>>>>>>> 5452670957ad53d4e76ff88da07375821614f57a
