@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 from pathlib import Path
+from dataclasses import dataclass
 
 from map import build_map
 from product_locations import product_locations
@@ -18,11 +19,25 @@ app = Flask(__name__,  static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
+user_id = 0
 
+
+@dataclass
+class UserData:
+    einkaufszettel: list
+
+
+user_datas = {
+    # format: USER_ID: UserData
+    # currently there is only user 0
+    0: UserData([]),
+}
 
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
+
+
 @app.route('/')
 def main():
     '''
@@ -40,6 +55,9 @@ def main():
         {'id': 5, 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
     ]
 
+    user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
+    print(f'user data is now {user_datas}')
+
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
@@ -53,10 +71,12 @@ def navigation():
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('navigation.html', time=date_time_str)
 
+
 @app.route('/map/')
 def map():
     svg = build_map()
     return render_template('index.html', svg=svg)
+
 
 @app.route('/map/<user>/map.svg')
 def serve_map(user):
@@ -64,7 +84,7 @@ def serve_map(user):
     Das hier sendet den statischen content wie js bilder, mp4 und so....
     '''
     svg = build_map()
-    #return Response(svg, mimetype='image/svg+xml')
+    # return Response(svg, mimetype='image/svg+xml')
     return Response(svg)
 
 
