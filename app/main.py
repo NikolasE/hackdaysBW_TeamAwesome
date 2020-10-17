@@ -1,4 +1,6 @@
-import json 
+#!/usr/bin/env python3
+
+import json
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
@@ -14,7 +16,6 @@ app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
 
-
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
@@ -25,7 +26,7 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-    
+
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('setup.html', time=date_time_str)
@@ -41,7 +42,7 @@ def serve_static(path):
 
 ### SOCKET FLASK PART ###
 # Receive a message from the front end HTML
-@socketio.on('client_server_namespace')   
+@socketio.on('client_server_namespace')
 def message_recieved(data):
     '''
     This receaves dynamic content which can then be used for anything else...
@@ -49,10 +50,10 @@ def message_recieved(data):
     Using emit will send the Data to all client which are connencted...
     '''
     print(data)
-    emit('server_client_namespace', data)    
+    emit('server_client_namespace', data)
 
 
 # Actually Start the App
 if __name__ == '__main__':
-    """ Run the app. """    
+    """ Run the app. """
     socketio.run(app, port=8000, debug=True)
