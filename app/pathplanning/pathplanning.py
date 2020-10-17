@@ -103,4 +103,4 @@ class Pathplanner:
         # if start_id=0, then [0 3 2 1]
         route = self._roll_route(start_id, route)
         path = self._route_to_path(route)
-        return path
+        return path, route
