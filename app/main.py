@@ -84,12 +84,14 @@ user_datas = {
 ### STATIC FLASK PART ###
 @app.route('/')
 def main():
+    global pizzas
     '''
     Main flask function returning the website
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
 
+    total_price=0
     # IDs correspond to the ones in `product_locations`
     pizzas = [
         {'id': "0116393",'price': '1.44', 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
@@ -125,7 +127,7 @@ def main():
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
+    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas,total_price=total_price)
 
 
 def _get_path_for_einkaufszettel(user_location, kasse_location):
@@ -171,7 +173,7 @@ def startseite():
     return render_template('startseite.html')
 
 
-client = vision.ImageAnnotatorClient()
+#client = vision.ImageAnnotatorClient()
 
 
 def get_left_right_direction(detected_tags, goal_tag):
@@ -281,7 +283,13 @@ def message_recieved(data):
         if data['product'] in user_datas[user_id].einkaufszettel:
             user_datas[user_id].einkaufszettel.remove(data['product'])
 
-    #emit('server_client_namespace', data)
+    total_price=0
+    for product_id in user_datas[user_id].einkaufszettel:
+        for pizza in pizzas:
+            if pizza['id'] == product_id:
+                total_price+=float(pizza['price'])
+    total_price = round(total_price, 2)
+    emit('server_client_namespace', total_price)
 
 
 def _get_ssl_context():
