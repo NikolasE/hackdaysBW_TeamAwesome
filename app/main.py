@@ -113,6 +113,11 @@ def main():
         {'id': "0173628", 'text': "Tomaten", 'url': '/static/tomaten.jpg'}
     ]
 
+    for item in pizzas:
+        if item['id'] in user_datas[user_id].einkaufszettel:
+            item["background"] = '#ffe10050'
+            item["inbasket"] = 'true'
+
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
