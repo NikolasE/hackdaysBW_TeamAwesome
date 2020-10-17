@@ -5,11 +5,22 @@ function sleep(milliseconds) {
     currentDate = Date.now();
   } while (currentDate - date < milliseconds);
 }
-function gotonavigator(){
+function gotonavigator() {
   console.log("Go To Navigator");
   document.getElementById("overlay").style.display = "block";
   location.href = "/navigation";
-} 
+}
+function in_my_basket(id) {
+  console.log(document.getElementById(id).style.background)
+  if (document.getElementById(id).style.background == "#ffe10050") {
+
+    document.getElementById(id).style.background = "#dee2e6";
+
+  } else {
+    document.getElementById(id).style.background = "#ffe10050";
+  }
+
+}
 
 // Stuff which runs after the js is fully loaded and ready
 $(document).ready(function () {
@@ -29,6 +40,6 @@ $(document).ready(function () {
     sleep(200);
     location.href = "/s";
   }
- 
+
 
 });

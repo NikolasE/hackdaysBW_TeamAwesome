@@ -135,6 +135,10 @@ def navigation():
     svg = build_map(coin_list, user_location, item_locations, path_list)
     return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
 
+@app.route('/startseite')
+def startseite():
+    return render_template('startseite.html')
+
 
 @app.route('/static/<path:path>')
 def serve_static(path):
