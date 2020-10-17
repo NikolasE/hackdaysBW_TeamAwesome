@@ -107,7 +107,7 @@ def _get_path_for_einkaufszettel(user_location):
     locs = [product_locations[id] for id in product_ids]
     locs = [user_location] + locs
     print(f"Item locations are: {locs}")
-    pp = Pathplanner(map_image_path='pathplanning/map.png', product_locations=locs)
+    pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
     path, route_indices = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
     route = [product_ids[id] for id in route_indices[1:]]  # indices to product ids
     print(f"calculated path is {path} and route is {route}")
