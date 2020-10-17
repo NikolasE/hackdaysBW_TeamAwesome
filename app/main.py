@@ -89,7 +89,6 @@ def build_map():
     return svg
 
 
-=======
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
