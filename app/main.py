@@ -5,6 +5,10 @@ from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 from pathlib import Path
+from dataclasses import dataclass
+
+from map import build_map
+from product_locations import product_locations
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -15,8 +19,8 @@ app = Flask(__name__,  static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
-### helper functions ###
 
+### helper functions ###
 
 def build_map():
     svg_map = """
@@ -24,15 +28,31 @@ def build_map():
     <polygon points="60,850 20,780 100,780" id="location" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
     <circle cx="60" cy="850" r="20" stroke="#003278" stroke-width="5" fill="#ffe300"/>    
     """
-
     svg_end = """</svg>"""
     svg = svg_map + svg_end
 
     return svg
 
+
+
+user_id = 0
+
+
+@dataclass
+class UserData:
+    einkaufszettel: list
+
+
+user_datas = {
+    # format: USER_ID: UserData
+    # currently there is only user 0
+    0: UserData([]),
+}
 ### STATIC FLASK PART ###
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
+
+
 @app.route('/')
 def main():
     '''
@@ -40,13 +60,18 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
+
+    # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'name': 'pizza1', 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-        {'name': 'pizza2', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'name': 'pizza3', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'name': 'pizza4', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'name': 'pizza5', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': 1, 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'id': 2, 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': 3, 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': 4, 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': 5, 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
     ]
+
+    user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
+    print(f'user data is now {user_datas}')
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
@@ -58,8 +83,10 @@ def navigation():
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
+
     svg = build_map()
     return render_template('navigation.html', svg=svg, time=date_time_str)
+
 
 
 @app.route('/map/<user>/map.svg')
@@ -68,7 +95,7 @@ def serve_map(user):
     Das hier sendet den statischen content wie js bilder, mp4 und so....
     '''
     svg = build_map()
-    #return Response(svg, mimetype='image/svg+xml')
+    # return Response(svg, mimetype='image/svg+xml')
     return Response(svg)
 
 
@@ -101,6 +128,7 @@ def _get_ssl_context():
     else:
         ssl_context = 'adhoc'
     return ssl_context
+
 
 # Actually Start the App
 if __name__ == '__main__':
