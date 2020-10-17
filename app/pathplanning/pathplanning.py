@@ -12,10 +12,10 @@ import skimage.graph
 
 class Pathplanner:
 
-    def __init__(self, map_image_path: Path, product_locations: Dict[int, Tuple[int]]) -> None:
+    def __init__(self, map_image_path: Path, product_locations: List[Tuple[int]]) -> None:
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
-        self.product_locations = product_locations
-        self.num_products = len(product_locations.keys())
+        self.product_locations = {i: v for i, v in enumerate(product_locations)}
+        self.num_products = len(self.product_locations.keys())
         self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
 
     def _calculate_inter_product_routes(self):
@@ -48,6 +48,8 @@ class Pathplanner:
 
                 path, cost = skimage.graph.route_through_array(
                     self.map, start=start_loc, end=end_loc, fully_connected=True)
+
+                assert cost > 0, "Products must not have the same locations"
 
                 inter_product_distances.append((start_id, end_id, cost))
                 inter_product_paths[start_id][end_id] = path
@@ -93,7 +95,10 @@ class Pathplanner:
         # print(dist_list)
 
     def get_path(self, start_id: int = 0, target_product_ids: Set[int] = None):
+        if len(self.product_locations) == 0:
+            return []
         dist_list = self._targets_to_dist_list(target_product_ids)
+        print(f"dist_list: {dist_list}")
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         # if start_id=0, then [0 3 2 1]
         route = self._roll_route(start_id, route)
