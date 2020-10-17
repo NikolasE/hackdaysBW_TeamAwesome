@@ -4,6 +4,7 @@ import json
 from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
+from pathlib import Path
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -15,6 +16,8 @@ app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
 ### helper functions ###
+
+
 def build_map():
     svg_map = """
 <svg id="svg-object" width="455" height="1000" xmlns="http://www.w3.org/2000/svg">
@@ -99,16 +102,26 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-
-    pizzas = [{'name': 'pizza1','text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-           {'name': 'pizza2','text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-           {'name': 'pizza3','text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-           {'name': 'pizza4','text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-           {'name': 'pizza5','text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'}]
+    pizzas = [
+        {'name': 'pizza1', 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'name': 'pizza2', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'name': 'pizza3', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'name': 'pizza4', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'name': 'pizza5', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+    ]
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('einkaufsliste.html', time=date_time_str,pizzas=pizzas)
+    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
+
+
+# Das ist die Hauptfunktion die die Seite an sich zurückgibt
+@app.route('/navigation')
+def navigation():
+
+    now = datetime.now()
+    date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
+    return render_template('navigation.html', time=date_time_str)
 
 @app.route('/map/')
 def map():
@@ -146,8 +159,17 @@ def message_recieved(data):
     emit('server_client_namespace', data)
 
 
+def _get_ssl_context():
+    fullchain = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/fullchain.pem')
+    privkey = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/privkey.pem')
+    if fullchain.is_file() and privkey.is_file():
+        ssl_context = (fullchain, privkey)
+    else:
+        ssl_context = 'adhoc'
+    return ssl_context
+
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-    socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
 
+    socketio.run(app, ssl_context=_get_ssl_context(), host="0.0.0.0", port=8000, debug=True)
