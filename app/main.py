@@ -36,16 +36,20 @@ def build_map(coin_list, location, item_list, path_list):
     #Coins
     for coin in coin_list:
         svg_map = svg_map + """
-            <ellipse cx="{0}" cy="{1}" rx="20" ry="25" style="fill:#efc501;stroke:#98720b;stroke-width:5" />
+            <ellipse cx="{0}" cy="{1}" rx="20" ry="25" style="fill:#efc501;stroke:#98720b;stroke-width:5">
+                <animate 
+                attributeName="rx" 
+                values="20; 2; 20" begin="0s" dur="5s" calcMode="linear" keyTimes="0; 0.5; 1" repeatCount="indefinite"/>
+            </ellipse>
 	        <line x1="{0}" y1="{2}" x2="{0}" y2="{3}" style="stroke:#98720b;opacity:1;stroke-width:10" />
 	        """.format(coin[0], coin[1], coin[1] - 10, coin[1] + 10)
 
     #Loactaion
     svg_map = svg_map + """
     <!-- Location -->
-    <polygon points="{0},{1} {2},{3} {4},{5}" id="location" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
+    <polygon points="{0},{1} {2},{3} {4},{5}" id="location" style="fill:#ffe300;fill-opacity:0.5;stroke:#003278;stroke-width:5" />
     <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300"/>
-    """.format(location[0],location[1], location[0]-40, location[1]-100, location[0]+40, location[1]-100)
+    """.format(location[1],location[0], location[1]-40, location[0]-100, location[1]+40, location[0]-100)
 
     # Items
     counter = 0
@@ -85,11 +89,13 @@ def main():
 
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': 1, 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-        {'id': 2, 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': 3, 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': 4, 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': 5, 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': "1", 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'id': "2", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': "3", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': "4", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': "5", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+        {'id': "0003376", 'text': 'Balisto', 'url': '/static/pizza5.jpg'},
+        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/pizza5.jpg'},
     ]
 
     user_datas[user_id].einkaufszettel = [item['id'] for item in pizzas]
@@ -100,30 +106,34 @@ def main():
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
 
 
-def _get_path_for_einkaufszettel(user_location):
+def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
     product_ids = [id for id in user_datas[user_id].einkaufszettel]
     locs = [product_locations[id] for id in product_ids]
-    locs = [user_location] + locs
+    locs = [user_location] + locs + [kasse_location]
     print(f"Item locations are: {locs}")
     pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
     path, route_indices = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
-    route = [product_ids[id-1] for id in route_indices[1:]]  # indices to product ids
+
+    route = [product_ids[id-1] for id in route_indices[1:-1]]  # indices to product ids
+
     print(f"calculated path is {path} and route is {route}")
     return path, route
+
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
     coin_list = [(100, 200), (200, 300)]
     user_location = (850, 60)  # y,x
+    kasse_location = (999, 400)
 
-    path_list, item_list = _get_path_for_einkaufszettel(user_location)
+    path_list, item_list = _get_path_for_einkaufszettel(user_location, kasse_location)
     item_locations = [product_locations[id] for id in item_list]
 
     svg = build_map(coin_list, user_location, item_locations, path_list)
-    return render_template('navigation.html', svg=svg)
+    return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
 
 
 @app.route('/static/<path:path>')

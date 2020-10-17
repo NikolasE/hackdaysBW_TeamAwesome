@@ -22,9 +22,6 @@ $(document).ready(function () {
     sleep(200);
     location.href = "/s";
   }
-
-  
-
 });
 */
 window.addEventListener("load", function() {
@@ -32,8 +29,24 @@ window.addEventListener("load", function() {
     window.scrollTo(0,document.body.scrollHeight);
   });
 
-
 //Kompass
+function startCompass() {
+  if (isIOS) {
+    DeviceOrientationEvent.requestPermission()
+      .then((response) => {
+        if (response === "granted") {
+          window.addEventListener("deviceorientation", handler, true);
+        } else {
+          alert("has to be allowed!");
+        }
+      })
+      .catch(() => alert("not supported"));
+  } else {
+    window.addEventListener("deviceorientationabsolute", handler, true);
+  }
+}
+
+
 if (window.DeviceOrientationEvent) {
   // Listen for the deviceorientation event and handle the raw data
   window.addEventListener('deviceorientation', function(eventData) {
@@ -46,14 +59,13 @@ if (window.DeviceOrientationEvent) {
         compassdir = event.alpha;
     }
         rotateDirection(compassdir);
-  });
+  }, true);
 }
+
 function rotateDirection(deg) {
     var svg = document.getElementById('location');
-    var svg_y = parseFloat(svg.getAttribute("y"));
-    var svg_x = parseFloat(svg.getAttribute("x"));
     if (svg) {
-        svg.setAttribute('transform','rotate('+ deg +', '+ svg_x', '+svg_y+')');
+        svg.setAttribute('transform','rotate('+ deg +', '+ document.getElementById("user_x").innerHTML +', '+ document.getElementById("user_y").innerHTML +')');
         console.log("rotation");
     }else{
         console.log("noElement");

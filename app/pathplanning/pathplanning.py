@@ -22,8 +22,8 @@ class Pathplanner:
                 everything in ebtween can be reshuffled by the tsp algorithm.
         """
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
-        self.product_locations = {i: v for i, v in enumerate(locations)}
-        self.num_products = len(self.product_locations.keys())
+        self.product_locations = locations
+        self.num_products = len(self.product_locations)
         self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
 
     def _calculate_inter_product_routes(self):
@@ -35,48 +35,29 @@ class Pathplanner:
             if loc[0] >= map_bounds[0] or loc[1] >= map_bounds[1] or loc[0] < 0 or loc[1] < 0:
                 raise ValueError(f'location {loc} is out of bounds {map_bounds}')
 
-        for product_start in self.product_locations.items():
-            start_id = product_start[0]
-            start_loc = product_start[1]
-            raise_if_out_of_bounds(start_loc)
+        product_locations = self.product_locations + [(0, 0)]  # add dummy location
+        dummy_location_index = len(product_locations) - 1
 
-            for product_end in self.product_locations.items():
-                end_id = product_end[0]
-                end_loc = product_end[1]
-                raise_if_out_of_bounds(end_loc)
-
-                # if we have the dist from 13 to 42 already, don't calculate 42 to 13
-                if end_id in inter_product_paths.keys():
-                    continue
-                if start_id == end_id:
-                    continue
-
-                # there must be no path between start and end so this is an open TSP
-                if start_id == 0 and end_id == self.num_products - 1:
-                    continue
-
-                if start_id not in inter_product_paths.keys():
-                    inter_product_paths[start_id] = {}
-
-                path, cost = skimage.graph.route_through_array(
-                    self.map, start=start_loc, end=end_loc, fully_connected=True)
-
+        inter_product_paths = dict()
+        inter_product_distances = []
+        for i_start, loc_start in enumerate(product_locations[:-1]):
+            inter_product_paths[i_start] = dict()
+            raise_if_out_of_bounds(loc_start)
+            for i_end, loc_end in enumerate(product_locations[i_start+1:]):
+                i_end += i_start + 1  # index is relative to where i_start is
+                raise_if_out_of_bounds(loc_end)
+                path, cost = None, None
+                if i_end == dummy_location_index:
+                    if i_start == 0:
+                        path, cost = ([], 1e-9)
+                    else:
+                        path, cost = ([], np.inf)
+                else:
+                    path, cost = skimage.graph.route_through_array(
+                        self.map, start=loc_start, end=loc_end, fully_connected=True)
                 assert cost > 0, "Products must not have the same locations"
-
-                inter_product_distances.append((start_id, end_id, cost))
-                inter_product_paths[start_id][end_id] = path
-
-        # add a dummy node with 0 dist to start, end and inf cost to everything else
-        start_id = 0
-        end_id = self.num_products-1
-        dummy_id = self.num_products
-        small_dist = 1e-9
-        inter_product_distances.append((start_id, dummy_id, small_dist))
-        for loc_id in range(1, self.num_products):
-            inter_product_distances.append((loc_id, dummy_id, np.inf))
-        inter_product_distances.append((end_id, dummy_id, small_dist))
-        inter_product_paths[start_id][dummy_id] = []
-        inter_product_paths[end_id] = {dummy_id: []}
+                inter_product_paths[i_start][i_end] = path
+                inter_product_distances.append((i_start, i_end, cost))
 
         return inter_product_distances, inter_product_paths
 
@@ -124,6 +105,7 @@ class Pathplanner:
         dist_list = self._targets_to_dist_list(target_product_ids)
         print(f"dist_list: {dist_list}")
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
+        print(f"route: {route}")
         # if start_id=0, then [0 3 2 1]
         route = self._roll_route(start_id, route)
         path = self._route_to_path(route)
