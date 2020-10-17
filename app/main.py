@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from map import build_map
 from product_locations import product_locations
+from pathplanning.pathplanning import Pathplanner
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -77,9 +78,22 @@ def main():
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
 
+
+def _get_path_for_einkaufszettel():
+    print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
+    # build product locations of only
+    locs = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
+    print(f"Item locations are: {locs}")
+    pp = Pathplanner(map_image_path='pathplanning/map.png', product_locations=locs)
+    path = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...]
+    print(f"calculated path is {path}")
+    return path
+
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
+
+    path = _get_path_for_einkaufszettel()
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
