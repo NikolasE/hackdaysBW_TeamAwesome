@@ -15,6 +15,8 @@ app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
 ### helper functions ###
+
+
 def build_map():
     svg_map = """
 <svg width="455" height="1000" xmlns="http://www.w3.org/2000/svg">>
@@ -99,14 +101,17 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-    pizzas = [{'name': 'pizza1','text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
-           {'name': 'pizza2','text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-           {'name': 'pizza3','text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-           {'name': 'pizza4','text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-           {'name': 'pizza5','text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'}]
+    pizzas = [
+        {'name': 'pizza1', 'text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
+        {'name': 'pizza2', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'name': 'pizza3', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'name': 'pizza4', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'name': 'pizza5', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+    ]
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('einkaufsliste.html', time=date_time_str,pizzas=pizzas)
+    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
+
 
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
@@ -115,6 +120,7 @@ def navigation():
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('navigation.html', time=date_time_str)
+
 
 @app.route('/map/<user>/map.svg')
 def serve_map(user):
@@ -149,5 +155,4 @@ def message_recieved(data):
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-    socketio.run(app, host="0.0.0.0", port=8000, debug=True)
-
+    socketio.run(app, ssl_context='adhoc', host="0.0.0.0", port=8000, debug=True)
