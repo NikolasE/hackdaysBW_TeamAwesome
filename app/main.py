@@ -99,15 +99,11 @@ def main():
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
-<<<<<<< HEAD
     pizzas = [{'name': 'pizza1','text': 'Papa Tonis', 'url': '/static/pizza1.jpg'},
            {'name': 'pizza2','text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
            {'name': 'pizza3','text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
            {'name': 'pizza4','text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
            {'name': 'pizza5','text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'}]
-=======
-
->>>>>>> 46bf46e952af7fa11dc317d3fafb5da64037a657
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str,pizzas=pizzas)
