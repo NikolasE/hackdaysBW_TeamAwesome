@@ -126,8 +126,16 @@ def _get_path_for_einkaufszettel(user_location, kasse_location):
 
 @app.route('/navigation')
 def navigation():
+
+    user_location = request.args.get('user_location')
+    if user_location is not None:
+        user_location = eval(user_location)
+    else:
+        user_location = (850, 60)  # y,x
+
+
     coin_list = [(100, 200), (200, 300)]
-    user_location = (850, 60)  # y,x
+
     kasse_location = (999, 400)
 
     path_list, item_list = _get_path_for_einkaufszettel(user_location, kasse_location)
@@ -137,29 +145,64 @@ def navigation():
     return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
 
 
-@app.route('/video')
-def video():
-    return render_template('video.html')
-
-
 # Temp
 client = vision.ImageAnnotatorClient()
 
-@app.route('/whereami', methods=['POST'])
+import re
+@app.route('/whereami', methods=['POST', 'GET'])
 def whereami():
+    if request.method == 'GET':
+        return render_template('video.html')
+    else:
+        base64 = request.form.get('base64')[22:]
+        response = client.annotate_image(
+            {'image': {'content': binascii.a2b_base64(base64)} }
+        )
+        texts = response.text_annotations
+        list_id_numbers = []
+        for text in texts:
+            x = re.search(r"(\d{7})\D",str(text))
+            if x != None:
+                list_id_numbers.append(re.sub('\D', '', x.group()))
 
-    base64 = request.form.get('base64')[22:]
-    print(base64)
+        if list_id_numbers == 0:
+            return render_template('video.html')
 
-    response = client.annotate_image(
-        {'image': {'content': binascii.a2b_base64(base64)}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+        user_location = product_locations[list_id_numbers[0]]
 
-    #response = client.annotate_image(
-    #    {'image': {'content': base64.encode()}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+        return redirect("/navigation?user_location={}".format(user_location), code=302)
 
-    print(response)
 
-    return redirect("/video", code=302)
+@app.route('/whereis', methods=['POST', 'GET'])
+def whereis():
+    if request.method == 'GET':
+        hidden = "none"
+        text = ""
+        return render_template('whereis.html', hidden=hidden, text=text, arrow=0)
+    else:
+        base64 = request.form.get('base64')[22:]
+        response = client.annotate_image(
+            {'image': {'content': binascii.a2b_base64(base64)}}  # , 'features': [{'type': "TEXT_DETECTION"}]}
+        )
+        texts = response.text_annotations
+        list_id_numbers = []
+        for text in texts:
+            x = re.search(r"(\d{7})\D", str(text))
+            if x != None:
+                list_id_numbers.append(re.sub('\D', '', x.group()))
+
+        print(list_id_numbers)
+
+        if len(list_id_numbers) == 0:
+            hidden = "none"
+            text = "No tag detected"
+        else:
+            hidden = "block"
+            text = ""
+
+        # Wenn Product in Liste => back
+
+        return render_template('whereis.html', hidden=hidden, text=text, arrow=90)
 
 
 @app.route('/static/<path:path>')
