@@ -72,7 +72,13 @@ class Pathplanner:
 
     def _roll_route(self, start_id: int, route: List[int]) -> List[int]:
         """Roll the route such that the start_id is at the start of the route."""
-        return np.roll(route, -list(route).index(start_id))
+        route = np.roll(route, -list(route).index(start_id))
+        dummy_id = np.max(route)
+        if route[1] == dummy_id:  # [0 8 5 4 1 2 3 6 7]
+            route = [route[0]] + route[2:]
+        if route[-1] == dummy_id:   # [0 5 4 1 2 3 6 7 8]
+            route = route[:-1]
+        return route[1:]
 
     def _route_to_path(self, route: List[int]) -> List[Tuple[int]]:
         """Piece together the paths between the route destinations."""
@@ -88,25 +94,14 @@ class Pathplanner:
             start = end
         return path
 
-    def _targets_to_dist_list(self, targets):
-        return self.inter_product_distances
-        # TODO: for now we can only use ALL of the products given in the initializer.
-        # Otherwise we'll get Exception: All nodes must appear at least once in distances.
-        # because ids will be missing, but mlrose wants them monotonically.
-        # def products_are_both_included(id1, id2) -> bool:
-        #     return id1 in target_product_ids and id2 in target_product_ids
-        # dist_list = [ipd for ipd in self.inter_product_distances if products_are_both_included(
-        #     ipd[0], ipd[1])]
-        # print(dist_list)
-
-    def get_path(self, start_id: int = 0, target_product_ids: Set[int] = None):
+    def get_path(self):
         if len(self.product_locations) == 0:
             return []
-        dist_list = self._targets_to_dist_list(target_product_ids)
+        dist_list = self.inter_product_distances
         print(f"dist_list: {dist_list}")
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         print(f"route: {route}")
         # if start_id=0, then [0 3 2 1]
-        route = self._roll_route(start_id, route)
+        route = self._roll_route(start_id=0, route=route)
         path = self._route_to_path(route)
         return path, route
