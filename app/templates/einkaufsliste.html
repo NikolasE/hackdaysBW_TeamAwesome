@@ -18,11 +18,12 @@
 <body>
 
     <div class="swatch-300" id="overlay"
-        style="position: absolute; z-index: 2; background-color: rgba(245, 245, 245, 0.7); width:100%; height:100%">
+        style="position: absolute; z-index: 2; background-color:  rgba(245, 245, 245, 0.7); width:100%; height:100%">
         <div class="text-center">
 
             <span style="position: relative; top: 25rem;">
-                <h1>Laden ...</h1>
+                <h1>Beste Route wird berechnet ...</h1>
+                
 
             </span>
         </div>
@@ -73,14 +74,16 @@
         </div>
 
         <div class="container-fluid " style="margin-top:10px;">
+            <!--       
             <div class="bg-warning text-center pl-2 pt-3 pb-3" style="margin-top:10px;">
                 <h7>Aufgrund deiner vorherigen Einkäufe können wir dir folgendes vorschlagen:</h7>
 
             </div>
-
+-->
 
             {% for pizza in pizzas %}
-            <div class="swatch-300 pl-2 pt-3 pb-3" style="margin-top:10px;">
+            <div class="swatch-300 pl-2 pt-3 pb-3" id="{{ pizza.id }}" style="margin-top:10px;"
+                onclick="in_my_basket({{ pizza.id }})">
                 <div class="row">
                     <div class="col ">
                         <img src="{{ pizza.url }}" width="100" height="100">

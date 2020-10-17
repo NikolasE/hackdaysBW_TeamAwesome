@@ -12,7 +12,7 @@ import skimage.graph
 
 class Pathplanner:
 
-    def __init__(self, map_image_path: Path, locations: List[Tuple[int]]) -> None:
+    def __init__(self, map_image_path: Path, locations: List[Tuple[int, int]]) -> None:
         """Initialize TSP Pathplanner.
 
         Args:
@@ -36,7 +36,7 @@ class Pathplanner:
                 raise ValueError(f'location {loc} is out of bounds {map_bounds}')
 
         product_locations = self.product_locations + [(0, 0)]  # add dummy location
-        dummy_location_index = len(product_locations) - 1
+        dummy_location_index = len(product_locations)
 
         inter_product_paths = dict()
         inter_product_distances = []
@@ -73,12 +73,11 @@ class Pathplanner:
     def _roll_route(self, start_id: int, route: List[int]) -> List[int]:
         """Roll the route such that the start_id is at the start of the route."""
         route = np.roll(route, -list(route).index(start_id))
-        dummy_id = np.max(route)
-        if route[1] == dummy_id:  # [0 8 5 4 1 2 3 6 7]
-            route = [route[0]] + route[2:]
-        if route[-1] == dummy_id:   # [0 5 4 1 2 3 6 7 8]
-            route = route[:-1]
-        return route[1:]
+
+        last_id = np.max(route)
+        if route[1] == last_id:  # [0 8 5 4 1 2 3 6 7]
+            route = np.flip(np.roll(route, -1))
+        return route
 
     def _route_to_path(self, route: List[int]) -> List[Tuple[int]]:
         """Piece together the paths between the route destinations."""
@@ -102,6 +101,13 @@ class Pathplanner:
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         print(f"route: {route}")
         # if start_id=0, then [0 3 2 1]
-        route = self._roll_route(start_id=0, route=route)
-        path = self._route_to_path(route)
-        return path, route
+        rolled_route = self._roll_route(start_id=0, route=route)
+        path = self._route_to_path(rolled_route)
+        return path, rolled_route
+
+
+if __name__ == "__main__":
+    pp = Pathplanner('/home/laurenz/Documents/Github/HackdaysBW_TeamAwesome/app/pathplanning/map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
+                                                                                                        (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
+    p = pp.get_path()
+    pass
