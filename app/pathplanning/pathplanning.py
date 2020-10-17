@@ -12,9 +12,17 @@ import skimage.graph
 
 class Pathplanner:
 
-    def __init__(self, map_image_path: Path, product_locations: List[Tuple[int]]) -> None:
+    def __init__(self, map_image_path: Path, locations: List[Tuple[int]]) -> None:
+        """Initialize TSP Pathplanner.
+
+        Args:
+            map_image_path: file path to a 8bit (!) grayscale (!) image file that holds the map,
+                where "whiter" is more passable
+            locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
+                everything in ebtween can be reshuffled by the tsp algorithm.
+        """
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
-        self.product_locations = {i: v for i, v in enumerate(product_locations)}
+        self.product_locations = {i: v for i, v in enumerate(locations)}
         self.num_products = len(self.product_locations.keys())
         self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
 
@@ -43,6 +51,10 @@ class Pathplanner:
                 if start_id == end_id:
                     continue
 
+                # there must be no path between start and end so this is an open TSP
+                if start_id == 0 and end_id == self.num_products - 1:
+                    continue
+
                 if start_id not in inter_product_paths.keys():
                     inter_product_paths[start_id] = {}
 
@@ -53,6 +65,18 @@ class Pathplanner:
 
                 inter_product_distances.append((start_id, end_id, cost))
                 inter_product_paths[start_id][end_id] = path
+
+        # add a dummy node with 0 dist to start, end and inf cost to everything else
+        start_id = 0
+        end_id = self.num_products-1
+        dummy_id = self.num_products
+        small_dist = 1e-9
+        inter_product_distances.append((start_id, dummy_id, small_dist))
+        for loc_id in range(1, self.num_products):
+            inter_product_distances.append((loc_id, dummy_id, np.inf))
+        inter_product_distances.append((end_id, dummy_id, small_dist))
+        inter_product_paths[start_id][dummy_id] = []
+        inter_product_paths[end_id] = {dummy_id: []}
 
         return inter_product_distances, inter_product_paths
 
