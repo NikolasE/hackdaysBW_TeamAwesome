@@ -287,7 +287,6 @@ def message_recieved(data):
         if data['product'] in user_datas[user_id].einkaufszettel:
             user_datas[user_id].einkaufszettel.remove(data['product'])
 
-<<<<<<< HEAD
     total_price=0
     for product_id in user_datas[user_id].einkaufszettel:
         for pizza in pizzas:
@@ -295,10 +294,9 @@ def message_recieved(data):
                 total_price+=float(pizza['price'])
     total_price = round(total_price, 2)
     emit('server_client_namespace', total_price)
-=======
     #emit('server_client_namespace', data)
+    
     print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
->>>>>>> 0f8029ef69fee7d640ca2328db8f4c085f8d4033
 
 
 def _get_ssl_context():
