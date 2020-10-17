@@ -162,6 +162,30 @@ def startseite():
 
 client = vision.ImageAnnotatorClient()
 
+
+
+def get_left_right_direction(detected_tags, goal_tag):
+    known_tags = ["0003376", "0000305", "0007873", "0119704", "0001847"]
+    try:
+        goal_ndx = detected_tags.index(goal_tag)
+    except ValueError:
+        print("Goal tag '%s' is unkown" % goal_tag)
+        return None    
+
+    # loop over all tags in case one is invalid
+    for t in detected_tags:
+        try:
+            current_ndx = known_tags.index(t)
+            return goal_ndx > current_ndx
+        except ValueError:
+            continue
+
+    return None
+        
+
+
+
+
 import re
 @app.route('/whereami', methods=['POST', 'GET'])
 def whereami():
@@ -179,6 +203,7 @@ def whereami():
             if x != None:
                 list_id_numbers.append(re.sub('\D', '', x.group()))
 
+        # [0003376, 0000305, 0007873, 0119704, 0001847]
         if list_id_numbers == 0:
             return render_template('video.html')
 
