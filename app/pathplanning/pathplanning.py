@@ -8,7 +8,7 @@ import mlrose  # noqa E402
 import numpy as np
 import skimage.io
 import skimage.graph
-
+import tqdm
 
 class Pathplanner:
 
@@ -40,6 +40,7 @@ class Pathplanner:
 
         inter_product_paths = dict()
         inter_product_distances = []
+        t = tqdm.tqdm(total=self.num_products*self.num_products - self.num_products)
         for i_start, loc_start in enumerate(product_locations[:-1]):
             i_start += 1
             inter_product_paths[i_start] = dict()
@@ -49,20 +50,13 @@ class Pathplanner:
                 print((i_start, i_end))
                 raise_if_out_of_bounds(loc_end)
                 path, cost = None, None
-                # if i_end == self.dummy_location_index:
-                #     if i_start == 0:
-                #         path, cost = ([], 1e-9)
-                #     else:
-                #         path, cost = ([], np.inf)
-                # else:
-                #     path, cost = skimage.graph.route_through_array(
-                #         self.map, start=loc_start, end=loc_end, fully_connected=True)
                 path, cost = skimage.graph.route_through_array(
                     self.map, start=loc_start, end=loc_end, fully_connected=True)
                 assert cost > 0, "Products must not have the same locations"
                 inter_product_paths[i_start][i_end] = path
                 inter_product_distances.append((i_start, i_end, cost))
-
+                t.update(1)
+        t.close()
         return inter_product_distances, inter_product_paths
 
     def _calculate_user_product_routes(self, user_loc):
