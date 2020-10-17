@@ -15,24 +15,53 @@ STATIC_URL_PATH = '/static'
 SECRET_KEY = 'SOME_SECRET_KEY!'
 
 # Init the server
-app = Flask(__name__,  static_url_path=STATIC_URL_PATH)
+app = Flask(__name__, static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
+coin_list = [(100, 200), (200, 300)]
+location = (60,850)
+item_list = [(200,700),(200,500)]
+path_list = [(100,800),(100,200)]
 
 ### helper functions ###
 
 def build_map():
-    svg_map = """
+    svg_map = ""
+
+    # Path
+    path_str = """<path d="M {0} {1}""".format(location[0], location[1])
+    for path in path_list:
+        path_str = path_str + "L {} {}".format(path[0], path[1])
+
+    path_str = path_str + """" stroke="black" fill="transparent" style="stroke:gray;stroke-width:10"/>"""
+
+    svg_map = svg_map + path_str
+
+    #Coins
+    for coin in coin_list:
+        svg_map = svg_map + """
+            <ellipse cx="{0}" cy="{1}" rx="20" ry="25" style="fill:#efc501;stroke:#98720b;stroke-width:5" />
+	        <line x1="{0}" y1="{2}" x2="{0}" y2="{3}" style="stroke:#98720b;opacity:1;stroke-width:10" />
+	        """.format(coin[0], coin[1], coin[1] - 10, coin[1] + 10)
+
+    #Loactaion
+    svg_map = svg_map + """
     <!-- Location -->
-    <polygon points="60,850 20,780 100,780" id="location" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
-    <circle cx="60" cy="850" r="20" stroke="#003278" stroke-width="5" fill="#ffe300"/>    
-    """
+    <polygon points="{0},{1} {2},{3} {4},{5}" id="location" style="fill:#ffe300;stroke:#003278;stroke-width:5" />
+    <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300"/>
+    """.format(location[0],location[1], location[0]-40, location[1]-100, location[0]+40, location[1]-100)
+
+    # Items
+    for item in item_list:
+        svg_map = svg_map + """
+        <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" />
+	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">1</text>
+	    """.format(item[0],item[1],item[0]-9, item[1]+10)
+
     svg_end = """</svg>"""
     svg = svg_map + svg_end
-
     return svg
-
 
 
 user_id = 0
@@ -48,11 +77,9 @@ user_datas = {
     # currently there is only user 0
     0: UserData([]),
 }
+
+
 ### STATIC FLASK PART ###
-
-# Das ist die Hauptfunktion die die Seite an sich zurückgibt
-
-
 @app.route('/')
 def main():
     '''
@@ -77,16 +104,15 @@ def main():
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
     return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
 
+
 # Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
-
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
 
     svg = build_map()
     return render_template('navigation.html', svg=svg, time=date_time_str)
-
 
 
 @app.route('/map/<user>/map.svg')
@@ -133,5 +159,4 @@ def _get_ssl_context():
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-
     socketio.run(app, ssl_context=_get_ssl_context(), host="0.0.0.0", port=8000, debug=True)
