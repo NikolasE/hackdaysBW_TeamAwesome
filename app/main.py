@@ -121,21 +121,8 @@ def _get_path_for_einkaufszettel():
 def navigation():
     path = _get_path_for_einkaufszettel()
 
-    now = datetime.now()
-    date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-
     svg = build_map()
-    return render_template('navigation.html', svg=svg, time=date_time_str)
-
-
-@app.route('/map/<user>/map.svg')
-def serve_map(user):
-    '''
-    Das hier sendet den statischen content wie js bilder, mp4 und so....
-    '''
-    svg = build_map()
-    # return Response(svg, mimetype='image/svg+xml')
-    return Response(svg)
+    return render_template('navigation.html', svg=svg)
 
 
 @app.route('/static/<path:path>')
