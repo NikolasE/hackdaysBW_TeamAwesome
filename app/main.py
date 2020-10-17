@@ -181,7 +181,7 @@ def get_left_right_direction(detected_tags, goal_tag):
     for t in detected_tags:
         try:
             current_ndx = known_tags.index(t)
-            return goal_ndx > current_ndx
+            return goal_ndx - current_ndx
         except ValueError:
             continue
 
