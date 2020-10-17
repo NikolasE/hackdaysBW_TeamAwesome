@@ -106,6 +106,11 @@ def main():
         {'id': "0057475", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
         {'id': "0098066", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
         {'id': "0122344", 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
+        #{'id': "0410170", 'text': "Hefe", url='/static/hefe.jpg'},
+        #{'id': "0212833", 'text': "Formil activ", url='/static/formil.png'},
+        #{'id': "0826492", 'text': "Fleischwurst", url='/static/fleischwurst.png'},
+        #{'id': "0926460", 'text': "Vollmilch", url='/static/milch.png'},
+        #{'id': "0173628", 'text': "Tomaten", url='/static/tomaten.jpg'}
     ]
 
     now = datetime.now()
