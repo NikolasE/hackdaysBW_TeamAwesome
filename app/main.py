@@ -54,7 +54,7 @@ def build_map(coin_list, location, item_list, path_list):
         <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" />
 	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">{4}</text>
 	    """.format(item[1],item[0],item[1]-9, item[0]+10, counter)
-        counter = counter +1
+        counter = counter + 1
 
     svg_end = """</svg>"""
     svg = svg_map + svg_end

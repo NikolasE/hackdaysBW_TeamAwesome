@@ -38,20 +38,22 @@ if (window.DeviceOrientationEvent) {
   // Listen for the deviceorientation event and handle the raw data
   window.addEventListener('deviceorientation', function(eventData) {
     var compassdir;
-
+    compassdir = 0;
     if(event.webkitCompassHeading) {
-      // Apple works only with this, alpha doesn't work
-      compassdir = event.webkitCompassHeading;
+        // Apple works only with this, alpha doesn't work
+        compassdir = event.webkitCompassHeading;
     } else {
-    compassdir = event.alpha;
+        compassdir = event.alpha;
     }
         rotateDirection(compassdir);
   });
 }
 function rotateDirection(deg) {
     var svg = document.getElementById('location');
+    var svg_y = parseFloat(svg.getAttribute("y"));
+    var svg_x = parseFloat(svg.getAttribute("x"));
     if (svg) {
-        svg.setAttribute('transform','rotate('+deg+', 60, 850)');
+        svg.setAttribute('transform','rotate('+ deg +', '+ svg_x', '+svg_y+')');
         console.log("rotation");
     }else{
         console.log("noElement");
