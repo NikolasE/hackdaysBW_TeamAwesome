@@ -118,7 +118,7 @@ def navigation():
     user_location = (850, 60) #y,x
     item_list = [product_locations[id] for id in user_datas[user_id].einkaufszettel]
 
-    path_list = _get_path_for_einkaufszettel(user_location)
+    path_list  = _get_path_for_einkaufszettel(user_location)
 
     svg = build_map(coin_list, user_location, item_list, path_list)
     return render_template('navigation.html', svg=svg)
