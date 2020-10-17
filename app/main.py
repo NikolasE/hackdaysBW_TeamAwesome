@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import json
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
+from google.cloud import vision
+import binascii
 
 from map import build_map
 from product_locations import product_locations
@@ -115,14 +117,13 @@ def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"Item locations are: {locs}")
     pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
     path, route_indices = pp.get_path()  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
-
+    route_indices = route_indices[1:-1]
     route = [product_ids[id-1] for id in route_indices]  # indices to product ids
 
     print(f"calculated path is {path} and route is {route}")
     return path, route
 
 
-# Das ist die Hauptfunktion die die Seite an sich zurückgibt
 @app.route('/navigation')
 def navigation():
     coin_list = [(100, 200), (200, 300)]
@@ -138,6 +139,31 @@ def navigation():
 @app.route('/startseite')
 def startseite():
     return render_template('startseite.html')
+
+
+@app.route('/video')
+def video():
+    return render_template('video.html')
+
+
+# Temp
+client = vision.ImageAnnotatorClient()
+
+@app.route('/whereami', methods=['POST'])
+def whereami():
+
+    base64 = request.form.get('base64')[22:]
+    print(base64)
+
+    response = client.annotate_image(
+        {'image': {'content': binascii.a2b_base64(base64)}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+
+    #response = client.annotate_image(
+    #    {'image': {'content': base64.encode()}})  # , 'features': [{'type': "LABEL_DETECTION"}]})
+
+    print(response)
+
+    return redirect("/video", code=302)
 
 
 @app.route('/static/<path:path>')
