@@ -90,8 +90,9 @@ class Pathplanner:
         inter_product_distances = []
 
         # tqdm creates a progress bar to show the process of the path computation
-        t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
-
+        num_prods = len(self.product_locations)
+        num_iters = (num_prods*num_prods)/2 - num_prods
+        t = tqdm.tqdm(total=num_iters)
         ean_start_index = 0
         for ean_start, loc_start in list(self.product_locations.items())[:-1]:
             inter_product_paths[ean_start] = dict()
