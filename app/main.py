@@ -17,10 +17,15 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 import configparser
+import shutil
 
 # CONFIG SECTION #
 config = configparser.ConfigParser()
-config.read('./lidl.conf')
+CONFIG_FILE_PATH = Path('lidl.conf')
+CONFIG_FILE_TEMPLATE = Path('lidl_template.conf')
+if not CONFIG_FILE_PATH.is_file():
+    shutil.copy(CONFIG_FILE_TEMPLATE, CONFIG_FILE_PATH)
+config.read(CONFIG_FILE_PATH)
 STATIC_URL_PATH = '/static'
 
 # Init the server
