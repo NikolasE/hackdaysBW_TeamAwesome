@@ -7,7 +7,9 @@ set -eux
 trap "exit" INT TERM ERR
 trap "kill 0" EXIT
 
-sudo ./main.py &
+export GOOGLE_APPLICATION_CREDENTIALS="~/key"
+
+./main.py &
 SERVER_PID=$!
 
 while true; do
@@ -20,11 +22,12 @@ while true; do
         git pull --rebase
         git stash pop
 
+        pip install -r requirements.txt
+
         kill $SERVER_PID || true
-        sudo ./main.py &
+        ./main.py &
         SERVER_PID=$!
     fi
 
     sleep 5
-    sudo -v
 done
