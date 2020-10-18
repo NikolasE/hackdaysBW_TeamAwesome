@@ -216,12 +216,8 @@ class Pathplanner:
 
         dist_list, paths = self._calculate_user_product_routes(user_loc)
         dist_list = self._filter_dists(selected_product_ids, dist_list)
-<<<<<<< HEAD
-        dist_list, paths = self._insert_dummy_node(dist_list, paths, end_at_id)
-        print(f"calculated dist_list = {dist_list}")
-=======
         dist_list = self._insert_dummy_node(dist_list, end_at_id)
->>>>>>> tsm_refactor
+        print(f"calculated dist_list = {dist_list}")
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         print(f"calculated route = {route}")
         route = self._map_to_selected_product_id_indices(selected_product_ids, route)
@@ -233,13 +229,7 @@ class Pathplanner:
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    pp = Pathplanner('map.png', [(853, 60), (100, 212), (150, 212), (190, 212),
-                                 (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
-    p, r = pp.get_path((10, 10), [1, 2, 3], 2)
-=======
     pp = Pathplanner('map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
     (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
     p, r = pp.get_path((10, 10), [1,2,3], 2)
->>>>>>> tsm_refactor
     pass
