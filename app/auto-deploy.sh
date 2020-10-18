@@ -9,9 +9,9 @@ trap "kill 0" EXIT
 
 sudo -v
 
-export GOOGLE_APPLICATION_CREDENTIALS="~/key"
+export GOOGLE_APPLICATION_CREDENTIALS="/home/ubuntu/key"
 
-SERVER_PID=-1
+sudo -H -E bash -c './main.py &'
 
 while true; do
     git fetch
@@ -23,7 +23,7 @@ while true; do
         git pull --rebase
         git stash pop
 
-        kill $SERVER_PID || true
+        sudo killall python3  # lol
         sudo -H -E bash -c './main.py &'
         SERVER_PID=$!
     fi
