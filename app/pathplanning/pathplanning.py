@@ -11,6 +11,8 @@ import skimage.graph
 import tqdm
 import json
 import os
+import hashlib
+
 
 class Pathplanner:
 
@@ -23,18 +25,24 @@ class Pathplanner:
             locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
                 everything in between can be reshuffled by the tsp algorithm.
         """
-        
+
         self.cache_path = '/tmp/path_cache.json'
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
+        self.locations_hash = self._get_hash_of_locations(locations)
         self.num_products = len(self.product_locations)
-        
+
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
 
         if not self._load_distance_and_paths():
             self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
             self._store_distance_and_paths()
+
+    def _get_hash_of_locations(self, locations):
+        m = hashlib.sha1()
+        m.update(str(locations).encode('utf-8'))
+        return m.hexdigest()
 
     def _load_distance_and_paths(self):
         if not os.path.exists(self.cache_path):
@@ -43,17 +51,27 @@ class Pathplanner:
         print("Loading distances and paths from file!")
         with open(self.cache_path, 'r') as f:
             data = json.load(f)
-            self.inter_product_distances = data['product_distances']
-            self.inter_product_paths = data['product_paths']
+            if self.locations_hash not in data.keys():
+                print("No cache for this locations hash found")
+                return False
+            self.inter_product_distances = data[self.locations_hash]['product_distances']
+            self.inter_product_paths = data[self.locations_hash]['product_paths']
 
-        return True    
+        return True
 
     def _store_distance_and_paths(self):
         print("Storing")
+        try:
+            with open(self.cache_path, 'r') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
         with open(self.cache_path, 'w') as f:
-            json.dump({"product_distances": self.inter_product_distances, 
-            "product_paths": self.inter_product_paths}, f)
-
+            data[self.locations_hash] = {
+                "product_distances": self.inter_product_distances,
+                "product_paths": self.inter_product_paths,
+            }
+            json.dump(data, f, indent=2)
 
     def _calculate_inter_product_routes(self):
         inter_product_distances = []
@@ -70,7 +88,7 @@ class Pathplanner:
         inter_product_paths = dict()
         inter_product_distances = []
 
-        ##  tqdm creates a progress bar to show the process of the path computation
+        # tqdm creates a progress bar to show the process of the path computation
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
 
         for i_start, loc_start in enumerate(product_locations[:-1]):
@@ -185,16 +203,19 @@ class Pathplanner:
         dist_list, paths = self._calculate_user_product_routes(user_loc)
         dist_list = self._filter_dists(selected_product_ids, dist_list)
         dist_list, paths = self._insert_dummy_node(dist_list, paths, end_at_id)
+        print(f"calculated dist_list = {dist_list}")
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
+        print(f"calculated route = {route}")
         route = self._map_to_selected_product_id_indices(selected_product_ids, route)
         # if start_id=0, then [0 3 2 1]
         rolled_route = self._roll_route(start_id=0, end_id=end_at_id, route=route)
+        print(f"rolled_route = {rolled_route}")
         path = self._route_to_path(rolled_route, paths)
         return path, rolled_route
 
 
 if __name__ == "__main__":
-    pp = Pathplanner('map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
-    (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
-    p, r = pp.get_path((10, 10), [1,2,3], 2)
+    pp = Pathplanner('map.png', [(853, 60), (100, 212), (150, 212), (190, 212),
+                                 (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
+    p, r = pp.get_path((10, 10), [1, 2, 3], 2)
     pass

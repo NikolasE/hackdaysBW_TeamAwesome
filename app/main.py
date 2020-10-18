@@ -153,9 +153,9 @@ def _get_path_for_einkaufszettel(user_location, kasse_location):
     # build product locations of only
     product_ids = [list(product_locations.keys()).index(id) for id in user_datas[user_id].einkaufszettel]  # TODO plus kasse
     end_id = product_ids[-1]  # kasse location
-    print(f"product_ids: {product_ids}")
+    print(f"calling get_path({user_location}, {product_ids}, {end_id})")
     path, route_indices = pathplanner.get_path(user_location, product_ids, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
-    print(route_indices)
+    print(f"got route_indices {route_indices}")
     route_indices = route_indices[1:-1]
     # route = [product_ids[id-1] for id in route_indices]  # indices to product ids
     route = [list(product_locations.keys())[id] for id in route_indices]
