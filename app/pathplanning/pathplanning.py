@@ -32,6 +32,8 @@ class Pathplanner:
         self.product_locations = locations
         self.locations_hash = self._get_hash_of_locations(locations)
         self.num_products = len(self.product_locations)
+        self.user_position_id = 0
+        self.dummy_id = None
 
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
