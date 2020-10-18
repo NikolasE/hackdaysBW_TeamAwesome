@@ -383,6 +383,16 @@ def message_recieved(data):
     print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
 
 
+def _get_ssl_context():
+    fullchain = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/fullchain.pem')
+    privkey = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/privkey.pem')
+    if fullchain.is_file() and privkey.is_file():
+        ssl_context = (fullchain, privkey)
+    else:
+        ssl_context = 'adhoc'
+    return ssl_context
+
+
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
