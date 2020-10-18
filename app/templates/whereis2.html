@@ -46,18 +46,9 @@
 
     <div class="container-fluid" style="height: calc(100% + 200px);">
 
-
-
-          <div class="camera text-center">
-            <video id="video">Video stream not available.</video>
-            <button class = "btn btn-lg btn-primary" id="startbutton">Where is my product</button>
+          <div class="center camera text-center">
+              {{svg|safe}}
           </div>
-
-        <form action="/whereis" id="whereami" method="post">
-            <input hidden="true" type="text" id="base64" name="base64">
-            <input hidden="true" type="number" id="x" name="x">
-            <input hidden="true" type="number" id="y" name="y">
-        </form>
 
         {{ text }}
         <div style = "display: {{ hidden }}">
@@ -70,15 +61,20 @@
                 </defs>
                 <line transform="rotate({{ arrow }}, 200, 200)"  x1="50" y1="200" x2="250" y2="200" stroke="#000"
                     stroke-width="8" marker-end="url(#arrowhead)" />
+                <text x="100" y="150" fill="#003278" font-size="4em">{{ number }}</text>
             </svg>
         </div>
-
-        <canvas id="canvas" hidden="true">
-        </canvas>
-          <div class="output" hidden="true">
-            <img id="photo" alt="The screen capture will appear in this box.">
-          </div>
     </div>
 </body>
+
+<script>
+    $(window).load(function() {
+    {% if number == 0 %}
+        window.setTimeout(function(){window.location.href = "{{redirect}}";}, 5000);    });
+    {% else %}
+        window.setTimeout(function(){window.location.href = "{{redirect}}";}, 10000);    });
+    {% endif %}
+
+</script>
 
 </html>

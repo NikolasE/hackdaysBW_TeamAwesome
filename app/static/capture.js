@@ -36,6 +36,8 @@
 
     video.addEventListener('canplay', function(ev){
       if (!streaming) {
+        document.getElementById('x').value = video.videoWidth
+        document.getElementById('y').value = video.videoHeight
         height = video.videoHeight / (video.videoWidth/width);
 
         // Firefox currently has a bug where the height can't be read from
