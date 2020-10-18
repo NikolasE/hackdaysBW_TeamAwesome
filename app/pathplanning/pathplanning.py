@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Tuple, Set, List
 from pathlib import Path
 # https://stackoverflow.com/a/62354885/5559867  # noqa E402
@@ -14,16 +15,15 @@ import os
 import hashlib
 from six import string_types
 
-
 class Pathplanner:
 
-    def __init__(self, map_image_path: Path, locations: List[Tuple[int, int]]) -> None:
+    def __init__(self, map_image_path: Path, locations: Dict[str, Tuple[int, int]]) -> None:
         """Initialize TSP Pathplanner.
 
         Args:
             map_image_path: file path to a 8bit (!) grayscale (!) image file that holds the map,
                 where "whiter" is more passable
-            locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
+            locations: dict of ean-string to (y,x) tuples that are the locations on the route. first one is start, last one is end.
                 everything in between can be reshuffled by the tsp algorithm.
         """
 
@@ -31,9 +31,6 @@ class Pathplanner:
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
         self.locations_hash = self._get_hash_of_locations(locations)
-        self.num_products = len(self.product_locations)
-        self.user_position_id = 0
-        self.dummy_id = None
 
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
@@ -89,44 +86,41 @@ class Pathplanner:
             if loc[0] >= map_bounds[0] or loc[1] >= map_bounds[1] or loc[0] < 0 or loc[1] < 0:
                 raise ValueError(f'location {loc} is out of bounds {map_bounds}')
 
-        product_locations = self.product_locations  # + [(0, 0)]  # add dummy location
-        # self.dummy_location_index = len(product_locations) - 1
-
         inter_product_paths = dict()
         inter_product_distances = []
 
         # tqdm creates a progress bar to show the process of the path computation
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
 
-        for i_start, loc_start in enumerate(product_locations[:-1]):
-            i_start += 1 # use 1-based indices to make space for starting position!
-            inter_product_paths[i_start] = dict()
+        ean_start_index = 0
+        for ean_start, loc_start in list(self.product_locations.items())[:-1]:
+            inter_product_paths[ean_start] = dict()
             raise_if_out_of_bounds(loc_start)
-            for i_end, loc_end in enumerate(product_locations[i_start:]):
-                i_end += i_start + 1  # index is relative to where i_start is
+            for ean_end, loc_end in list(self.product_locations.items())[ean_start_index+1:]:
                 raise_if_out_of_bounds(loc_end)
                 path, cost = None, None
                 path, cost = skimage.graph.route_through_array(
                     self.map, start=loc_start, end=loc_end, fully_connected=True)
                 assert cost > 0, "Products must not have the same locations"
-                inter_product_paths[i_start][i_end] = path
-                inter_product_distances.append((i_start, i_end, cost))
+                inter_product_paths[ean_start][ean_end] = path
+                inter_product_distances.append((ean_start, ean_end, cost))
                 t.update(1)
+            ean_start_index += 1
         t.close()
         return inter_product_distances, inter_product_paths
 
     def _calculate_user_product_routes(self, user_loc):
+
         paths = self.inter_product_paths.copy()
         dists = self.inter_product_distances.copy()
-        paths[self.user_position_id] = dict()
+        paths['_user'] = dict()
 
         # compute distance and path to all products
-        for prod_id, loc_prod in enumerate(self.product_locations):
-            prod_id += 1 # space for user ugly...
+        for ean_target, loc_target in self.product_locations.items():
             path, cost = skimage.graph.route_through_array(
-                self.map, start=user_loc, end=loc_prod, fully_connected=True)
-            paths[self.user_position_id][prod_id] = path
-            dists.append((self.user_position_id, prod_id, cost))
+                self.map, start=user_loc, end=loc_target, fully_connected=True)
+            paths['_user'][ean_target] = path
+            dists.append(('_user', ean_target, cost))
 
         return dists, paths
 
@@ -138,12 +132,12 @@ class Pathplanner:
         indices.update(set([d[1] for d in dists]))
         return list(indices)
 
-    def _insert_dummy_node(self, dists, end_id):
-        assert end_id in self._get_indices_in_dist(dists)
+    def _insert_dummy_node(self, dists, user_id, end_id):
+        assert end_id in self._get_indices_in_dist(dists), "end id not in dists list"
 
         """Insert a dummy node between the user node and the last node."""
         self.dummy_id = self._get_max_index_value_in_dists(dists) + 1
-        dists.append((self.user_position_id, self.dummy_id, 1))
+        dists.append((user_id, self.dummy_id, 1))
         dists.append((self.dummy_id, end_id, 1))
         return dists
 
@@ -183,55 +177,67 @@ class Pathplanner:
             start = end
         return path
 
-    def _filter_dists(self, selected_product_ids, dist_list):
+    def _filter_dists(self, selected_artikel_eans, dist_list):
+
+        selected_artikel_eans_and_user = selected_artikel_eans + ["_user"]
 
         def is_in_spid(src, target):
-            return src in selected_product_ids and target in selected_product_ids
+            in_selected_products = src in selected_artikel_eans_and_user and target in selected_artikel_eans_and_user
+            return in_selected_products
 
-        dists = []
+        ean_to_tsp_id = {}
+        filtered_dists_with_tsp_id = []
         for src, target, dist in dist_list:
             if is_in_spid(src, target):
-                new_src_idx = list(selected_product_ids).index(src)
-                new_target_idx = list(selected_product_ids).index(target)
-                dists.append((new_src_idx, new_target_idx, dist))
+                new_src_idx = list(selected_artikel_eans_and_user).index(src)
+                new_target_idx = list(selected_artikel_eans_and_user).index(target)
+                ean_to_tsp_id[src] = new_src_idx
+                ean_to_tsp_id[target] = new_target_idx
 
-        return dists
+                filtered_dists_with_tsp_id.append((new_src_idx, new_target_idx, dist))
 
-    def _map_to_selected_product_id_indices(self, selected_product_ids, route):
-        assert selected_product_ids[0] == self.user_position_id
-        route = np.array(route)
-        route[route.argmax()] = -1  # set max value in array to -1 [aka remove dummy node!]
-        try:
-            return [selected_product_ids[route_point] for route_point in route if route_point != -1]
-        except Exception:
-            print(f"_map_to_selected_product_id_indices({selected_product_ids}, {route}) failed.")
-            raise
+        return filtered_dists_with_tsp_id, ean_to_tsp_id
 
-    def get_path(self, user_loc, selected_product_ids, end_at_id):
-        assert end_at_id in selected_product_ids, f"end id {end_at_id} must be within {selected_product_ids}"
-        end_at_id = list(selected_product_ids).index(end_at_id)  # transform to tsp ids
-        if self.num_products == 0:
-            return [], []
-        
-        if self.user_position_id not in selected_product_ids:
-            selected_product_ids = [self.user_position_id] + selected_product_ids
+    def _remove_dummy(self, route_with_dummy):
+        route_no_dummy = list(route_with_dummy)
+        route_no_dummy.remove(self.dummy_id)
+        return route_no_dummy
 
-        dist_list, paths = self._calculate_user_product_routes(user_loc)
-        dist_list = self._filter_dists(selected_product_ids, dist_list)
-        dist_list = self._insert_dummy_node(dist_list, end_at_id)
-        print(f"calculated dist_list = {dist_list}")
-        route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
-        print(f"calculated route = {route}")
-        route = self._map_to_selected_product_id_indices(selected_product_ids, route)
-        print(f"route with product location indices = {route}")
-        rolled_route = self._roll_route(start_id=0, end_id=end_at_id, route=route)
+    def _convert_route_from_tsp_id_to_ean(self, ean_to_tsp_id: dict, rolled_route: List[int]):
+        def invert_lookup(d: dict, v):
+            ndx = list(d.values()).index(v)
+            return list(d.keys())[ndx]
+        ean_route = [invert_lookup(ean_to_tsp_id, tsp_id) for tsp_id in rolled_route]
+        return ean_route
+
+
+    def get_path(self, user_location, selected_artikel_eans, end_ean):
+        if end_ean not in selected_artikel_eans:
+            selected_artikel_eans.append(end_ean)
+
+        dist_list_ean_all_with_user, paths = self._calculate_user_product_routes(user_location)
+        dist_list_tspids_selected_with_user, ean_to_tsp_id = self._filter_dists(selected_artikel_eans, dist_list_ean_all_with_user)
+        end_tsp_id = ean_to_tsp_id[end_ean]
+        user_tsp_id = ean_to_tsp_id['_user']
+        dist_list_tspids_selected_with_user_and_dummy = self._insert_dummy_node(dist_list_tspids_selected_with_user, user_tsp_id, end_tsp_id)
+        print(f"calculated dist_list = {dist_list_tspids_selected_with_user_and_dummy}")
+        route_with_dummy = self._do_tsp(dist_list_tspids_selected_with_user_and_dummy)
+        print(f"calculated route = {route_with_dummy}")
+        route_no_dummy = self._remove_dummy(route_with_dummy)
+        print(f"route with product location indices = {route_no_dummy}")
+        rolled_route = self._roll_route(start_id=user_tsp_id, end_id=end_tsp_id, route=route_no_dummy)
         print(f"rolled_route = {rolled_route}")
-        path = self._route_to_path(rolled_route, paths)
-        return path, rolled_route
+        rolled_route_with_eans = self._convert_route_from_tsp_id_to_ean(ean_to_tsp_id, rolled_route)
+        path = self._route_to_path(rolled_route_with_eans, paths)
+        return path, rolled_route_with_eans
 
 
 if __name__ == "__main__":
-    pp = Pathplanner('map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
-    (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
-    p, r = pp.get_path((10, 10), [1,2,3], 2)
+    pl = {
+        "_kasse": (899, 399),
+        "0003376": (730, 110),
+        "0116393": (200, 110),
+    }
+    pp = Pathplanner('map.png', pl)
+    p, r = pp.get_path((10, 10), ["0003376", "0116393"], "_kasse")
     pass
