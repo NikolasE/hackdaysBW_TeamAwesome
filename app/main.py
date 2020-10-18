@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 from flask import Flask, render_template, request, Response, redirect
+from flask import send_from_directory
 from flask_socketio import SocketIO, emit, send
 from datetime import datetime
 from pathlib import Path
@@ -17,6 +18,7 @@ from PIL import Image
 from io import BytesIO
 import configparser
 import shutil
+import os
 
 # CONFIG SECTION #
 config = configparser.ConfigParser()
@@ -355,6 +357,10 @@ def whereis():
 
         return render_template('whereis2.html', number=abs(direction), svg = svg, redirect=redirect, hidden=hidden, text=text, arrow=arrow)
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/static/<path:path>')
 def serve_static(path):
