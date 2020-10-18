@@ -40,10 +40,7 @@ function in_my_basket(id) {
 $(document).ready(function () {
 
   // initial connect to socket
-
-
   document.getElementById("overlay").style.display = "none";
-
 
   // Message recieved from server in the 'server_client_namespace
   // You can have as many namespaces as you whish... 

@@ -16,14 +16,16 @@ import base64
 import numpy as np
 from PIL import Image
 from io import BytesIO
+import configparser
 
 # CONFIG SECTION #
+config = configparser.ConfigParser()
+config.read('./lidl.conf')
 STATIC_URL_PATH = '/static'
-SECRET_KEY = 'SOME_SECRET_KEY!'
 
 # Init the server
 app = Flask(__name__, static_url_path=STATIC_URL_PATH)
-app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SECRET_KEY'] = config['FLASK']['secret']
 socketio = SocketIO(app, logger=False)
 
 kasse_location = (999, 400)
@@ -375,17 +377,10 @@ def message_recieved(data):
     print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
 
 
-def _get_ssl_context():
-    fullchain = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/fullchain.pem')
-    privkey = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/privkey.pem')
-    if fullchain.is_file() and privkey.is_file():
-        ssl_context = (fullchain, privkey)
-    else:
-        ssl_context = 'adhoc'
-    return ssl_context
-
-
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-    socketio.run(app, ssl_context=_get_ssl_context(), host="0.0.0.0", port=8000, debug=True)
+    if config['FLASK']['debug']:
+        socketio.run(app, ssl_context='adhoc', port = config['FLASK']['port'], host = config['FLASK']['host'], debug=True)
+    else:
+        socketio.run(app, port = config['FLASK']['port'], host=config['FLASK']['host'], debug=False)
