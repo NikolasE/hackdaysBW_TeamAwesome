@@ -17,10 +17,15 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 import configparser
+import shutil
 
 # CONFIG SECTION #
 config = configparser.ConfigParser()
-config.read('./lidl.conf')
+CONFIG_FILE_PATH = Path('lidl.conf')
+CONFIG_FILE_TEMPLATE = Path('lidl_template.conf')
+if not CONFIG_FILE_PATH.is_file():
+    shutil.copy(CONFIG_FILE_TEMPLATE, CONFIG_FILE_PATH)
+config.read(CONFIG_FILE_PATH)
 STATIC_URL_PATH = '/static'
 
 # Init the server
@@ -148,14 +153,15 @@ def _get_path_for_einkaufszettel(user_location, kasse_location):
     # build product locations of only
     product_ids = [list(product_locations.keys()).index(id) for id in user_datas[user_id].einkaufszettel]  # TODO plus kasse
     end_id = product_ids[-1]  # kasse location
-    print(f"product_ids: {product_ids}")
+    print(f"calling get_path({user_location}, {product_ids}, {end_id})")
     path, route_indices = pathplanner.get_path(user_location, product_ids, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
-    print(route_indices)
-    route_indices = route_indices[1:-1]
+    print(f"got route_indices {route_indices}")
+    route_indices = route_indices[1:]  # TODO: ignore kasse after it's added
     # route = [product_ids[id-1] for id in route_indices]  # indices to product ids
     route = [list(product_locations.keys())[id] for id in route_indices]
 
     print(f"calculated route is {route}")
+    print(f"calculated path is {path}")
     return path, route
 
 
@@ -375,6 +381,16 @@ def message_recieved(data):
     #emit('server_client_namespace', data)
     
     print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
+
+
+def _get_ssl_context():
+    fullchain = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/fullchain.pem')
+    privkey = Path('/etc/letsencrypt/live/woistdiehefe.latai.de/privkey.pem')
+    if fullchain.is_file() and privkey.is_file():
+        ssl_context = (fullchain, privkey)
+    else:
+        ssl_context = 'adhoc'
+    return ssl_context
 
 
 # Actually Start the App

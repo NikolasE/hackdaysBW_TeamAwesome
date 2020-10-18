@@ -1,6 +1,10 @@
 product_locations = {
     # format: ID, (X, Y)
     # ID 0 is the users current location
+
+    # if you change this list, make sure to remove the cached distances file
+    # the file is /tmp/path_cache.json
+
     "0003376": (730, 110),
     "0116393": (200, 110),
     "0007873": (700, 110),
