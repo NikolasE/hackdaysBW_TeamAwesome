@@ -380,7 +380,7 @@ def message_recieved(data):
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """
-    if config['FLASK']['debug']:
+    if config['FLASK']['debug'] == 'True':
         socketio.run(app, ssl_context='adhoc', port = config['FLASK']['port'], host = config['FLASK']['host'], debug=True)
     else:
         socketio.run(app, port = config['FLASK']['port'], host=config['FLASK']['host'], debug=False)
