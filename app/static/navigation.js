@@ -3,6 +3,7 @@ var socket = io.connect('https://localhost:8000/', { secure: true });
  console.log("[+] Connected");
 
 window.addEventListener("load", function() {
+    document.getElementById("overlay").style.display = "none";
     rotateDirection(0);
     window.scrollTo(0,document.body.scrollHeight);
   });
@@ -50,3 +51,8 @@ function rotateDirection(deg) {
     }
 }
 
+function gotonavigator(redirect) {
+  console.log("Go To Navigator");
+  document.getElementById("overlay").style.display = "block";
+  location.href = redirect;
+}
