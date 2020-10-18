@@ -7,7 +7,7 @@ set -eux
 trap "exit" INT TERM ERR
 trap "kill 0" EXIT
 
-./main.py &
+sudo ./main.py &
 SERVER_PID=$!
 
 while true; do
@@ -19,11 +19,12 @@ while true; do
         git stash
         git pull --rebase
         git stash pop
-        
+
         kill $SERVER_PID || true
-        ./main.py &
+        sudo ./main.py &
         SERVER_PID=$!
     fi
 
     sleep 5
+    sudo -v
 done
