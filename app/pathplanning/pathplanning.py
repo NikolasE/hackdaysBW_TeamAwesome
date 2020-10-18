@@ -9,16 +9,11 @@ import numpy as np
 import skimage.io
 import skimage.graph
 import tqdm
-<<<<<<< HEAD
 import pickle
 import os
 import hashlib
 from six import string_types
 
-=======
-import json
-import os
->>>>>>> tsm_refactor
 
 class Pathplanner:
 
@@ -31,53 +26,30 @@ class Pathplanner:
             locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
                 everything in between can be reshuffled by the tsp algorithm.
         """
-<<<<<<< HEAD
 
         self.cache_path = '/tmp/path_cache.pickle'
-=======
-        
-        self.cache_path = '/tmp/path_cache.json'
->>>>>>> tsm_refactor
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
         self.locations_hash = self._get_hash_of_locations(locations)
         self.num_products = len(self.product_locations)
-<<<<<<< HEAD
 
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
 
-=======
-        
-        self.inter_product_distances = list()
-        self.inter_product_paths = dict()
-
-        self.user_position_id = 0
-        self.dummy_id = None
-
->>>>>>> tsm_refactor
         if not self._load_distance_and_paths():
             self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
             self._store_distance_and_paths()
 
-<<<<<<< HEAD
     def _get_hash_of_locations(self, locations):
         m = hashlib.sha1()
         m.update(str(locations).encode('utf-8'))
         return m.hexdigest()
 
     def _load_distance_and_paths(self):
-=======
-    def _load_distance_and_paths(self):
-        '''
-        Load distances and path from file if it exists
-        '''
->>>>>>> tsm_refactor
         if not os.path.exists(self.cache_path):
             print("No cache file for distances!")
             return False
         print("Loading distances and paths from file!")
-<<<<<<< HEAD
         with open(self.cache_path, 'rb') as f:
             try:
                 data = pickle.load(f)
@@ -105,23 +77,6 @@ class Pathplanner:
         }
         with open(self.cache_path, 'wb') as f:
             pickle.dump(data, f)
-=======
-        with open(self.cache_path, 'r') as f:
-            data = json.load(f)
-            self.inter_product_distances = data['product_distances']
-            self.inter_product_paths = data['product_paths']
-
-        return True    
-
-    def _store_distance_and_paths(self):
-        '''
-        Store distances and paths in a file so that they don't have to be recomputed at every start
-        '''
-        print("Storing")
-        with open(self.cache_path, 'w') as f:
-            json.dump({"product_distances": self.inter_product_distances, 
-            "product_paths": self.inter_product_paths}, f)
->>>>>>> tsm_refactor
 
     def _calculate_inter_product_routes(self):
         inter_product_distances = []
@@ -138,11 +93,7 @@ class Pathplanner:
         inter_product_paths = dict()
         inter_product_distances = []
 
-<<<<<<< HEAD
         # tqdm creates a progress bar to show the process of the path computation
-=======
-        ##  tqdm creates a progress bar to show the process of the path computation
->>>>>>> tsm_refactor
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
 
         for i_start, loc_start in enumerate(product_locations[:-1]):
