@@ -9,11 +9,16 @@ import numpy as np
 import skimage.io
 import skimage.graph
 import tqdm
+<<<<<<< HEAD
 import pickle
 import os
 import hashlib
 from six import string_types
 
+=======
+import json
+import os
+>>>>>>> tsm_refactor
 
 class Pathplanner:
 
@@ -26,30 +31,53 @@ class Pathplanner:
             locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
                 everything in between can be reshuffled by the tsp algorithm.
         """
+<<<<<<< HEAD
 
         self.cache_path = '/tmp/path_cache.pickle'
+=======
+        
+        self.cache_path = '/tmp/path_cache.json'
+>>>>>>> tsm_refactor
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
         self.locations_hash = self._get_hash_of_locations(locations)
         self.num_products = len(self.product_locations)
+<<<<<<< HEAD
 
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
 
+=======
+        
+        self.inter_product_distances = list()
+        self.inter_product_paths = dict()
+
+        self.user_position_id = 0
+        self.dummy_id = None
+
+>>>>>>> tsm_refactor
         if not self._load_distance_and_paths():
             self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
             self._store_distance_and_paths()
 
+<<<<<<< HEAD
     def _get_hash_of_locations(self, locations):
         m = hashlib.sha1()
         m.update(str(locations).encode('utf-8'))
         return m.hexdigest()
 
     def _load_distance_and_paths(self):
+=======
+    def _load_distance_and_paths(self):
+        '''
+        Load distances and path from file if it exists
+        '''
+>>>>>>> tsm_refactor
         if not os.path.exists(self.cache_path):
             print("No cache file for distances!")
             return False
         print("Loading distances and paths from file!")
+<<<<<<< HEAD
         with open(self.cache_path, 'rb') as f:
             try:
                 data = pickle.load(f)
@@ -77,6 +105,23 @@ class Pathplanner:
         }
         with open(self.cache_path, 'wb') as f:
             pickle.dump(data, f)
+=======
+        with open(self.cache_path, 'r') as f:
+            data = json.load(f)
+            self.inter_product_distances = data['product_distances']
+            self.inter_product_paths = data['product_paths']
+
+        return True    
+
+    def _store_distance_and_paths(self):
+        '''
+        Store distances and paths in a file so that they don't have to be recomputed at every start
+        '''
+        print("Storing")
+        with open(self.cache_path, 'w') as f:
+            json.dump({"product_distances": self.inter_product_distances, 
+            "product_paths": self.inter_product_paths}, f)
+>>>>>>> tsm_refactor
 
     def _calculate_inter_product_routes(self):
         inter_product_distances = []
@@ -93,11 +138,15 @@ class Pathplanner:
         inter_product_paths = dict()
         inter_product_distances = []
 
+<<<<<<< HEAD
         # tqdm creates a progress bar to show the process of the path computation
+=======
+        ##  tqdm creates a progress bar to show the process of the path computation
+>>>>>>> tsm_refactor
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
 
         for i_start, loc_start in enumerate(product_locations[:-1]):
-            i_start += 1
+            i_start += 1 # use 1-based indices to make space for starting position!
             inter_product_paths[i_start] = dict()
             raise_if_out_of_bounds(loc_start)
             for i_end, loc_end in enumerate(product_locations[i_start:]):
@@ -114,29 +163,36 @@ class Pathplanner:
         return inter_product_distances, inter_product_paths
 
     def _calculate_user_product_routes(self, user_loc):
-        user_id = 0
         paths = self.inter_product_paths.copy()
         dists = self.inter_product_distances.copy()
-        paths[user_id] = dict()
+        paths[self.user_position_id] = dict()
+
+        # compute distance and path to all products
         for prod_id, loc_prod in enumerate(self.product_locations):
-            prod_id += 1
+            prod_id += 1 # space for user ugly...
             path, cost = skimage.graph.route_through_array(
                 self.map, start=user_loc, end=loc_prod, fully_connected=True)
-            paths[user_id][prod_id] = path
-            dists.append((user_id, prod_id, cost))
+            paths[self.user_position_id][prod_id] = path
+            dists.append((self.user_position_id, prod_id, cost))
 
         return dists, paths
 
     def _get_max_index_value_in_dists(self, dists):
         return np.max([max(dist_point[0], dist_point[1]) for dist_point in dists])
 
-    def _insert_dummy_node(self, dists, paths, end_id):
+    def _get_indices_in_dist(self, dists):
+        indices = set([d[0] for d in dists])
+        indices.update(set([d[1] for d in dists]))
+        return list(indices)
+
+    def _insert_dummy_node(self, dists, end_id):
+        assert end_id in self._get_indices_in_dist(dists)
+
         """Insert a dummy node between the user node and the last node."""
-        user_id = 0
-        dummy_id = self._get_max_index_value_in_dists(dists) + 1
-        dists.append((user_id, dummy_id, 1))
-        dists.append((dummy_id, end_id, 1))
-        return dists, paths
+        self.dummy_id = self._get_max_index_value_in_dists(dists) + 1
+        dists.append((self.user_position_id, self.dummy_id, 1))
+        dists.append((self.dummy_id, end_id, 1))
+        return dists
 
     def _do_tsp(self, dist_list):
         """Do the actual travelling salesperson."""
@@ -189,7 +245,7 @@ class Pathplanner:
         return dists
 
     def _map_to_selected_product_id_indices(self, selected_product_ids, route):
-        assert selected_product_ids[0] == 0
+        assert selected_product_ids[0] == self.user_position_id
         route = np.array(route)
         route[route.argmax()] = -1  # set max value in array to -1
         try:
@@ -203,12 +259,18 @@ class Pathplanner:
         end_at_id = list(selected_product_ids).index(end_at_id)  # transform to tsp ids
         if self.num_products == 0:
             return [], []
-        if 0 not in selected_product_ids:
-            selected_product_ids = [0] + selected_product_ids
+        
+        if self.user_position_id not in selected_product_ids:
+            selected_product_ids = [self.user_position_id] + selected_product_ids
+
         dist_list, paths = self._calculate_user_product_routes(user_loc)
         dist_list = self._filter_dists(selected_product_ids, dist_list)
+<<<<<<< HEAD
         dist_list, paths = self._insert_dummy_node(dist_list, paths, end_at_id)
         print(f"calculated dist_list = {dist_list}")
+=======
+        dist_list = self._insert_dummy_node(dist_list, end_at_id)
+>>>>>>> tsm_refactor
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         print(f"calculated route = {route}")
         route = self._map_to_selected_product_id_indices(selected_product_ids, route)
@@ -220,7 +282,13 @@ class Pathplanner:
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     pp = Pathplanner('map.png', [(853, 60), (100, 212), (150, 212), (190, 212),
                                  (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
     p, r = pp.get_path((10, 10), [1, 2, 3], 2)
+=======
+    pp = Pathplanner('map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
+    (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
+    p, r = pp.get_path((10, 10), [1,2,3], 2)
+>>>>>>> tsm_refactor
     pass
