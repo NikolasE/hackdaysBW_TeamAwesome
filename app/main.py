@@ -7,11 +7,15 @@ from pathlib import Path
 from dataclasses import dataclass
 from google.cloud import vision
 import binascii
-import re
-import time
 from map import build_map
 from product_locations import product_locations
 from pathplanning.pathplanning import Pathplanner
+import re
+import cv2
+import base64
+import numpy as np
+from PIL import Image
+from io import BytesIO
 
 # CONFIG SECTION #
 STATIC_URL_PATH = '/static'
@@ -61,8 +65,10 @@ def build_map(coin_list, location, item_list, path_list):
 
     # Items
     counter = 0
+    print(item_list)
     for item in item_list:
         svg_map = svg_map + """
+        <!-- Item -->
         <circle cx="{0}" cy="{1}" r="20" stroke="#003278" stroke-width="5" fill="#ffe300" />
 	    <text x="{2}" y="{3}" fill="#003278" font-size="2em">{4}</text>
 	    """.format(item[1],item[0],item[1]-9, item[0]+10, counter)
@@ -161,12 +167,17 @@ def navigation():
         user_location = (850, 60)  # y,x
 
 
-    coin_list = [(100, 200), (200, 300)]
+    coin_list = [(440, 25), (210, 320)]
 
     kasse_location = (999, 400)
 
     path_list, item_list = _get_path_for_einkaufszettel(user_location, kasse_location)
+
+    print(item_list)
+
     item_locations = [product_locations[id] for id in item_list]
+    print(item_locations)
+
 
     svg = build_map(coin_list, user_location, item_locations, path_list)
     return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
@@ -195,16 +206,8 @@ def get_left_right_direction(detected_tags, goal_tag):
             return goal_ndx - current_ndx
         except ValueError:
             continue
-
     return None
-        
 
-import re
-import cv2
-import base64
-import numpy as np
-from PIL import Image
-from io import BytesIO
 
 @app.route('/whereami', methods=['POST', 'GET'])
 def whereami():

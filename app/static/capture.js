@@ -39,7 +39,7 @@
         document.getElementById('x').value = video.videoWidth
         document.getElementById('y').value = video.videoHeight
         height = video.videoHeight / (video.videoWidth/width);
-
+        document.getElementById("overlay").style.display = "none";
         // Firefox currently has a bug where the height can't be read from
         // the video, so we will make assumptions if this happens.
 
@@ -56,6 +56,7 @@
     }, false);
 
     startbutton.addEventListener('click', function(ev){
+      document.getElementById("overlay").style.display = "block";
       document.getElementById('base64').value=takepicture();
       video.pause();
       ev.preventDefault();
