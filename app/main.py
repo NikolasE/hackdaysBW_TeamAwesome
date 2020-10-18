@@ -7,7 +7,6 @@ from pathlib import Path
 from dataclasses import dataclass
 from google.cloud import vision
 import binascii
-from map import build_map
 from product_locations import product_locations
 from pathplanning.pathplanning import Pathplanner
 import re

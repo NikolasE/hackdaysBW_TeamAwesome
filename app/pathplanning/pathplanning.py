@@ -15,6 +15,8 @@ import os
 import hashlib
 from six import string_types
 
+CACHE_PATH = 'cache.pickle'
+
 class Pathplanner:
 
     def __init__(self, map_image_path: Path, locations: Dict[str, Tuple[int, int]]) -> None:
@@ -27,7 +29,6 @@ class Pathplanner:
                 everything in between can be reshuffled by the tsp algorithm.
         """
 
-        self.cache_path = '/tmp/path_cache.pickle'
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
         self.locations_hash = self._get_hash_of_locations(locations)
@@ -45,11 +46,11 @@ class Pathplanner:
         return m.hexdigest()
 
     def _load_distance_and_paths(self):
-        if not os.path.exists(self.cache_path):
+        if not os.path.exists(CACHE_PATH):
             print("No cache file for distances!")
             return False
         print("Loading distances and paths from file!")
-        with open(self.cache_path, 'rb') as f:
+        with open(CACHE_PATH, 'rb') as f:
             try:
                 data = pickle.load(f)
             except EOFError:
@@ -66,7 +67,7 @@ class Pathplanner:
     def _store_distance_and_paths(self):
         print("Storing")
         try:
-            with open(self.cache_path, 'rb') as f:
+            with open(CACHE_PATH, 'rb') as f:
                 data = pickle.load(f)
         except (FileNotFoundError, EOFError):
             data = {}
@@ -74,7 +75,7 @@ class Pathplanner:
             "product_distances": self.inter_product_distances,
             "product_paths": self.inter_product_paths,
         }
-        with open(self.cache_path, 'wb') as f:
+        with open(CACHE_PATH, 'wb') as f:
             pickle.dump(data, f)
 
     def _calculate_inter_product_routes(self):

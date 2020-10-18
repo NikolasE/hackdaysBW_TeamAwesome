@@ -3,4 +3,4 @@ venv/
 .vscode/
 __pycache__
 lidl.conf
-
+cache.pickle
