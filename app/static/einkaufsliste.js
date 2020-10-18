@@ -18,15 +18,15 @@ function in_my_basket(id) {
   console.log(val);
 
 
-  if (document.getElementById(id+"_selected").innerHTML == "true") {
-    element = document.getElementById(id+"_selected")
+  if (document.getElementById(id + "_selected").innerHTML == "true") {
+    element = document.getElementById(id + "_selected")
     element.parentElement.classList.remove("bg-warning");
     element.parentElement.classList.add("swatch-400");
     element.innerHTML = "false";
     socket.emit('client_server_namespace', { 'product': id, 'inbasket': 0 });
 
   } else {
-    element = document.getElementById(id+"_selected")
+    element = document.getElementById(id + "_selected")
     element.parentElement.classList.remove("swatch-400");
     element.parentElement.classList.add("bg-warning");
     element.innerHTML = "true";
@@ -43,5 +43,15 @@ $(document).ready(function () {
 
 
   document.getElementById("overlay").style.display = "none";
+
+
+  // Message recieved from server in the 'server_client_namespace
+  // You can have as many namespaces as you whish... 
+  socket.on("server_client_namespace", function (message) {
+    console.log(message);
+    document.getElementById("total_price").innerHTML = 'total price: '+message+' €';
+    //document.getElementById("value").innerHTML = message.button;
+    //document.getElementById("myImg").src = "/static/bild"+message.button+".jpg";
+  });
 
 });

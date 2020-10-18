@@ -22,6 +22,11 @@ app = Flask(__name__, static_url_path=STATIC_URL_PATH)
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app, logger=False)
 
+kasse_location = (999, 400)
+pathplanning_locations = list(product_locations.values()) + [kasse_location]
+pathplanner = Pathplanner(map_image_path='pathplanning/map.png', locations=pathplanning_locations)
+
+
 ### helper functions ###
 
 def build_map(coin_list, location, item_list, path_list):
@@ -84,33 +89,35 @@ user_datas = {
 ### STATIC FLASK PART ###
 @app.route('/')
 def main():
+    global pizzas
     '''
     Main flask function returning the website
     Serving a website from a function only makes sense if you actually add some dynamic content to it...
     We will send the current time.
     '''
 
+    total_price=0
     # IDs correspond to the ones in `product_locations`
     pizzas = [
-        {'id': "0116393", 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
-        {'id': "0007873", 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
-        {'id': "0000305", 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
-        {'id': "0119704", 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
-        {'id': "0001847", 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
-        {'id': "0003376", 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
-        {'id': "0136673", 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
-        {'id': "0003430", 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
-        {'id': "0047627", 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
-        {'id': "0001375", 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': "0034957", 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': "0057475", 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': "0098066", 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
-        {'id': "0122344", 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
-        {'id': "0410170", 'text': "Hefe", 'url': '/static/hefe.jpg'},
-        {'id': "0212833", 'text': "Formil activ", 'url': '/static/formil.png'},
-        {'id': "0826492", 'text': "Fleischwurst", 'url': '/static/fleischwurst.png'},
-        {'id': "0926460", 'text': "Vollmilch", 'url': '/static/milch.png'},
-        {'id': "0173628", 'text': "Tomaten", 'url': '/static/tomaten.jpg'}
+        {'id': "0116393",'price': '1.44', 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
+        {'id': '0007873', 'price': '1.93', 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
+        {'id': '0000305', 'price': '1.92', 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
+        {'id': '0119704', 'price': '1.32', 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
+        {'id': '0001847', 'price': '2.22', 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
+        {'id': '0003376', 'price': '1.73', 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
+        {'id': '0136673', 'price': '3.21', 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
+        {'id': '0003430', 'price': '0.58', 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
+        {'id': '0047627', 'price': '1.56', 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
+        {'id': '0001375', 'price': '1.95', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+        {'id': '0034957', 'price': '1.87', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+        {'id': '0057475', 'price': '2.57', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+        {'id': '0098066', 'price': '2.12', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
+        {'id': '0122344', 'price': '1.98', 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
+        {'id': '0410170', 'price': '0.79', 'text': 'Hefe', 'url': '/static/hefe.jpg'},
+        {'id': '0212833', 'price': '7.43', 'text': 'Formil activ', 'url': '/static/formil.png'},
+        {'id': '0826492', 'price': '2.46', 'text': 'Fleischwurst', 'url': '/static/fleischwurst.png'},
+        {'id': '0926460', 'price': '1.23', 'text': 'Vollmilch', 'url': '/static/milch.png'},
+        {'id': '0173628', 'price': '2.50', 'text': 'Tomaten', 'url': '/static/tomaten.jpg'}
     ]
 
     for counter, item in enumerate(pizzas):
@@ -125,23 +132,22 @@ def main():
 
     now = datetime.now()
     date_time_str = now.strftime("%m/%d/%Y, %H:%M:%S")
-    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas)
+    return render_template('einkaufsliste.html', time=date_time_str, pizzas=pizzas,total_price=total_price)
 
 
 def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"We're supposed to collect all these item IDs: {user_datas[user_id].einkaufszettel}")
     # build product locations of only
-    product_ids = [id for id in user_datas[user_id].einkaufszettel]
-    locs = [product_locations[id] for id in product_ids]
-    locs = locs + [kasse_location]
-    print(f"Item locations are: {locs}")
-    pp = Pathplanner(map_image_path='pathplanning/map.png', locations=locs)
-    end_id = len(locs)  # kasse location
-    path, route_indices = pp.get_path(user_location, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
+    product_ids = [list(product_locations.keys()).index(id) for id in user_datas[user_id].einkaufszettel]  # TODO plus kasse
+    end_id = product_ids[-1]  # kasse location
+    print(f"product_ids: {product_ids}")
+    path, route_indices = pathplanner.get_path(user_location, product_ids, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
+    print(route_indices)
     route_indices = route_indices[1:-1]
-    route = [product_ids[id-1] for id in route_indices]  # indices to product ids
+    # route = [product_ids[id-1] for id in route_indices]  # indices to product ids
+    route = [list(product_locations.keys())[id] for id in route_indices]
 
-    print(f"calculated path is {path} and route is {route}")
+    print(f"calculated route is {route}")
     return path, route
 
 
@@ -172,6 +178,7 @@ def startseite():
 
 
 client = vision.ImageAnnotatorClient()
+
 def get_left_right_direction(detected_tags, goal_tag):
     known_tags = ["0003376", "0000305", "0007873", "0119704", "0001847"]
     try:
@@ -353,7 +360,16 @@ def message_recieved(data):
         if data['product'] in user_datas[user_id].einkaufszettel:
             user_datas[user_id].einkaufszettel.remove(data['product'])
 
+    total_price=0
+    for product_id in user_datas[user_id].einkaufszettel:
+        for pizza in pizzas:
+            if pizza['id'] == product_id:
+                total_price+=float(pizza['price'])
+    total_price = round(total_price, 2)
+    emit('server_client_namespace', total_price)
     #emit('server_client_namespace', data)
+    
+    print(f"einkaufszettel ist: {user_datas[user_id].einkaufszettel}")
 
 
 def _get_ssl_context():
