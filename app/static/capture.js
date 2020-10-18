@@ -19,16 +19,16 @@
   var photo = null;
   var startbutton = null;
 
-    //const videoElement = document.querySelector('video')
-    //const videoSelect = document.querySelector('select#videoSource')
-
   function startup() {
     video = document.getElementById('video');
     canvas = document.getElementById('canvas');
     photo = document.getElementById('photo');
     startbutton = document.getElementById('startbutton');
 
-    navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false})
+    navigator.mediaDevices.getUserMedia({audio: false,
+                                         video: {
+                                            facingMode: 'environment'
+                                        }})
     .then(function(stream) {
       video.srcObject = stream;
       video.play();

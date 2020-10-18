@@ -201,6 +201,10 @@ def startseite():
     return render_template('startseite.html')
 
 
+@app.route('/mobile')
+def mobile():
+    return render_template('phone.html')
+
 client = vision.ImageAnnotatorClient()
 
 def get_left_right_direction(detected_tags, goal_tag):
