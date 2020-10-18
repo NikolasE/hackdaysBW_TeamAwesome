@@ -1,4 +1,5 @@
-var socket = io.connect('https://localhost:8000/', { secure: true });
+var socket = io.connect('https://localhost:8000/', { secure: false });
+
 
 function sleep(milliseconds) {
   const date = Date.now();

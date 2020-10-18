@@ -383,4 +383,4 @@ if __name__ == '__main__':
     if config['FLASK']['debug'] == 'True':
         socketio.run(app, ssl_context='adhoc', port = config['FLASK']['port'], host = config['FLASK']['host'], debug=True)
     else:
-        socketio.run(app, port = config['FLASK']['port'], host=config['FLASK']['host'], debug=False)
+        socketio.run(app, ssl_context=(config['FLASK']['cert'],config['FLASK']['key']), port = config['FLASK']['port'], host=config['FLASK']['host'], debug=False)
