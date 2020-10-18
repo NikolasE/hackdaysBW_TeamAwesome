@@ -156,11 +156,12 @@ def _get_path_for_einkaufszettel(user_location, kasse_location):
     print(f"calling get_path({user_location}, {product_ids}, {end_id})")
     path, route_indices = pathplanner.get_path(user_location, product_ids, end_id)  # [(0, 0), (0, 1), (0, 1), (0, 2), (0, 3), (0, 4), ...], [0 3 2 1]
     print(f"got route_indices {route_indices}")
-    route_indices = route_indices[1:-1]
+    route_indices = route_indices[1:]  # TODO: ignore kasse after it's added
     # route = [product_ids[id-1] for id in route_indices]  # indices to product ids
     route = [list(product_locations.keys())[id] for id in route_indices]
 
     print(f"calculated route is {route}")
+    print(f"calculated path is {path}")
     return path, route
 
 

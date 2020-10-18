@@ -225,7 +225,7 @@ class Pathplanner:
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         print(f"calculated route = {route}")
         route = self._map_to_selected_product_id_indices(selected_product_ids, route)
-        # if start_id=0, then [0 3 2 1]
+        print(f"route with product location indices = {route}")
         rolled_route = self._roll_route(start_id=0, end_id=end_at_id, route=route)
         print(f"rolled_route = {rolled_route}")
         path = self._route_to_path(rolled_route, paths)
