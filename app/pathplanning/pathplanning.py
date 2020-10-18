@@ -121,7 +121,6 @@ class Pathplanner:
         indices.update(set([d[1] for d in dists]))
         return list(indices)
 
-
     def _insert_dummy_node(self, dists, paths, end_id):
         assert end_id in self._get_indices_in_dist(dists)
 
@@ -182,7 +181,7 @@ class Pathplanner:
         return dists
 
     def _map_to_selected_product_id_indices(self, selected_product_ids, route):
-        assert selected_product_ids[0] == 0
+        assert selected_product_ids[0] == self.user_position_id
         route = np.array(route)
         route[route.argmax()] = -1  # set max value in array to -1
         try:
@@ -196,8 +195,10 @@ class Pathplanner:
         end_at_id = list(selected_product_ids).index(end_at_id)  # transform to tsp ids
         if self.num_products == 0:
             return [], []
-        if 0 not in selected_product_ids:
-            selected_product_ids = [0] + selected_product_ids
+        
+        if self.user_position_id not in selected_product_ids:
+            selected_product_ids = [self.user_position_id] + selected_product_ids
+
         dist_list, paths = self._calculate_user_product_routes(user_loc)
         dist_list = self._filter_dists(selected_product_ids, dist_list)
         dist_list, paths = self._insert_dummy_node(dist_list, paths, end_at_id)
