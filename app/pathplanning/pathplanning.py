@@ -121,14 +121,14 @@ class Pathplanner:
         indices.update(set([d[1] for d in dists]))
         return list(indices)
 
-    def _insert_dummy_node(self, dists, paths, end_id):
+    def _insert_dummy_node(self, dists, end_id):
         assert end_id in self._get_indices_in_dist(dists)
 
         """Insert a dummy node between the user node and the last node."""
         self.dummy_id = self._get_max_index_value_in_dists(dists) + 1
         dists.append((self.user_position_id, self.dummy_id, 1))
         dists.append((self.dummy_id, end_id, 1))
-        return dists, paths
+        return dists
 
     def _do_tsp(self, dist_list):
         """Do the actual travelling salesperson."""
@@ -201,7 +201,7 @@ class Pathplanner:
 
         dist_list, paths = self._calculate_user_product_routes(user_loc)
         dist_list = self._filter_dists(selected_product_ids, dist_list)
-        dist_list, paths = self._insert_dummy_node(dist_list, paths, end_at_id)
+        dist_list = self._insert_dummy_node(dist_list, end_at_id)
         route = self._do_tsp(dist_list)  # e.g. [2 1 0 3]
         route = self._map_to_selected_product_id_indices(selected_product_ids, route)
         # if start_id=0, then [0 3 2 1]
