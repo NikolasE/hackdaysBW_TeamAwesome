@@ -203,7 +203,7 @@ def startseite():
     return render_template('startseite.html')
 
 
-@app.route('/mobile')
+@app.route('/laptop')
 def mobile():
     return render_template('phone.html')
 
