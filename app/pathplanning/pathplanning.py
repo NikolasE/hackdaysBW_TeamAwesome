@@ -32,11 +32,17 @@ class Pathplanner:
         self.inter_product_distances = list()
         self.inter_product_paths = dict()
 
+        self.user_position_id = 0
+        self.dummy_id = None
+
         if not self._load_distance_and_paths():
             self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
             self._store_distance_and_paths()
 
     def _load_distance_and_paths(self):
+        '''
+        Load distances and path from file if it exists
+        '''
         if not os.path.exists(self.cache_path):
             print("No cache file for distances!")
             return False
@@ -49,11 +55,13 @@ class Pathplanner:
         return True    
 
     def _store_distance_and_paths(self):
+        '''
+        Store distances and paths in a file so that they don't have to be recomputed at every start
+        '''
         print("Storing")
         with open(self.cache_path, 'w') as f:
             json.dump({"product_distances": self.inter_product_distances, 
             "product_paths": self.inter_product_paths}, f)
-
 
     def _calculate_inter_product_routes(self):
         inter_product_distances = []
@@ -74,7 +82,7 @@ class Pathplanner:
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
 
         for i_start, loc_start in enumerate(product_locations[:-1]):
-            i_start += 1
+            i_start += 1 # use 1-based indices to make space for starting position!
             inter_product_paths[i_start] = dict()
             raise_if_out_of_bounds(loc_start)
             for i_end, loc_end in enumerate(product_locations[i_start:]):
@@ -91,28 +99,36 @@ class Pathplanner:
         return inter_product_distances, inter_product_paths
 
     def _calculate_user_product_routes(self, user_loc):
-        user_id = 0
         paths = self.inter_product_paths.copy()
         dists = self.inter_product_distances.copy()
-        paths[user_id] = dict()
+        paths[self.user_position_id] = dict()
+
+        # compute distance and path to all products
         for prod_id, loc_prod in enumerate(self.product_locations):
-            prod_id += 1
+            prod_id += 1 # space for user ugly...
             path, cost = skimage.graph.route_through_array(
                 self.map, start=user_loc, end=loc_prod, fully_connected=True)
-            paths[user_id][prod_id] = path
-            dists.append((user_id, prod_id, cost))
+            paths[self.user_position_id][prod_id] = path
+            dists.append((self.user_position_id, prod_id, cost))
 
         return dists, paths
 
     def _get_max_index_value_in_dists(self, dists):
         return np.max([max(dist_point[0], dist_point[1]) for dist_point in dists])
 
+    def _get_indices_in_dist(self, dists):
+        indices = set([d[0] for d in dists])
+        indices.update(set([d[1] for d in dists]))
+        return list(indices)
+
+
     def _insert_dummy_node(self, dists, paths, end_id):
+        assert end_id in self._get_indices_in_dist(dists)
+
         """Insert a dummy node between the user node and the last node."""
-        user_id = 0
-        dummy_id = self._get_max_index_value_in_dists(dists) + 1
-        dists.append((user_id, dummy_id, 1))
-        dists.append((dummy_id, end_id, 1))
+        self.dummy_id = self._get_max_index_value_in_dists(dists) + 1
+        dists.append((self.user_position_id, self.dummy_id, 1))
+        dists.append((self.dummy_id, end_id, 1))
         return dists, paths
 
     def _do_tsp(self, dist_list):
