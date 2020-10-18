@@ -3,17 +3,11 @@ import unittest
 from pathplanning.pathplanning import Pathplanner, Path
 class TestPathPlanning(unittest.TestCase):
 
-<<<<<<< HEAD
-    def test_bla(self):
-        pp = Pathplanner('app/pathplanning/map.png', [(850, 60), (100, 212), (150, 212), (190, 212)])
-        print(pp.inter_product_distances)
-        # p, r = pp.get_path((10, 10), [1,2,3], 2)
-        # print(p, r)
-        # print(p[0])
-=======
+    map_path = 'app/pathplanning/map.png'
+
     def test_caching(self):
         positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
-        pp = Pathplanner('app/pathplanning/map.png', positions)
+        pp = Pathplanner(self.map_path, positions)
         print(pp.inter_product_distances)
         # check 
         indices = pp._get_indices_in_dist(pp.inter_product_distances) 
@@ -29,14 +23,14 @@ class TestPathPlanning(unittest.TestCase):
 
 
     def test_full(self):
-        positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
-        pp = Pathplanner('app/pathplanning/map.png', positions)
+        pp = Pathplanner(self.map_path, [(850, 60), (100, 212), (150, 212), (190, 212),
+        (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
         p, r = pp.get_path((10, 10), [1,2,3], 2)
-        print(p)
+        print(p, r)
 
     def test_add_user_position(self):
         positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
-        pp = Pathplanner('app/pathplanning/map.png', positions)
+        pp = Pathplanner(self.map_path, positions)
         new_dist, new_path = pp._calculate_user_product_routes((0,0))
 
         indices = pp._get_indices_in_dist(new_dist)
@@ -61,7 +55,6 @@ class TestPathPlanning(unittest.TestCase):
         pass
 
 
->>>>>>> tsm_refactor
 
 if __name__ == '__main__':
     unittest.main()

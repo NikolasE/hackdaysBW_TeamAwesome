@@ -200,7 +200,7 @@ class Pathplanner:
     def _map_to_selected_product_id_indices(self, selected_product_ids, route):
         assert selected_product_ids[0] == self.user_position_id
         route = np.array(route)
-        route[route.argmax()] = -1  # set max value in array to -1
+        route[route.argmax()] = -1  # set max value in array to -1 [aka remove dummy node!]
         try:
             return [selected_product_ids[route_point] for route_point in route if route_point != -1]
         except Exception:
