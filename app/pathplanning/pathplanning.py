@@ -12,6 +12,7 @@ import tqdm
 import json
 import os
 import hashlib
+from six import string_types
 
 
 class Pathplanner:
@@ -50,7 +51,21 @@ class Pathplanner:
             return False
         print("Loading distances and paths from file!")
         with open(self.cache_path, 'r') as f:
-            data = json.load(f)
+
+            def int_please_object_hook(obj):
+                """If a value in obj is a string, try to convert it to an int"""
+                rv = {}
+                for k, v in obj.items():
+                    if isinstance(v, string_types):
+                        try:
+                            rv[k] = int(v)
+                        except ValueError:
+                            rv[k] = v
+                    else:
+                        rv[k] = v
+                return rv
+
+            data = json.load(f, object_hook=int_please_object_hook)
             if self.locations_hash not in data.keys():
                 print("No cache for this locations hash found")
                 return False
