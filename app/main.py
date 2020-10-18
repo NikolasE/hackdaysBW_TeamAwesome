@@ -96,6 +96,27 @@ user_datas = {
     0: UserData([]),
 }
 
+pizzas = [
+    {'id': "0116393", 'price': '1.44', 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
+    {'id': '0007873', 'price': '1.93', 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
+    {'id': '0000305', 'price': '1.92', 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
+    {'id': '0119704', 'price': '1.32', 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
+    {'id': '0001847', 'price': '2.22', 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},
+    {'id': '0003376', 'price': '1.73', 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
+    {'id': '0136673', 'price': '3.21', 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
+    {'id': '0003430', 'price': '0.58', 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
+    {'id': '0047627', 'price': '1.56', 'text': 'Pickup', 'url': '/static/pickup.jpeg'},
+    {'id': '0001375', 'price': '1.95', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
+    {'id': '0034957', 'price': '1.87', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
+    {'id': '0057475', 'price': '2.57', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
+    {'id': '0098066', 'price': '2.12', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},
+    {'id': '0122344', 'price': '1.98', 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
+    {'id': '0410170', 'price': '0.79', 'text': 'Hefe', 'url': '/static/hefe.jpg'},
+    {'id': '0212833', 'price': '7.43', 'text': 'Formil activ', 'url': '/static/formil.png'},
+    {'id': '0826492', 'price': '2.46', 'text': 'Fleischwurst', 'url': '/static/fleischwurst.png'},
+    {'id': '0926460', 'price': '1.23', 'text': 'Vollmilch', 'url': '/static/milch.png'},
+    {'id': '0173628', 'price': '2.50', 'text': 'Tomaten', 'url': '/static/tomaten.jpg'}
+]
 
 ### STATIC FLASK PART ###
 @app.route('/')
@@ -109,27 +130,7 @@ def main():
 
     total_price=0
     # IDs correspond to the ones in `product_locations`
-    pizzas = [
-        {'id': "0116393",'price': '1.44', 'text': 'Wagner Steinofen', 'url': '/static/wagner.jpeg'},
-        {'id': '0007873', 'price': '1.93', 'text': 'kinder bueno', 'url': '/static/kinder_bueno.jpeg'},
-        {'id': '0000305', 'price': '1.92', 'text': 'kinder Country', 'url': '/static/kinder_country.jpeg'},
-        {'id': '0119704', 'price': '1.32', 'text': 'Bellona', 'url': '/static/bellona.jpeg'},
-        {'id': '0001847', 'price': '2.22', 'text': 'kinder Überraschung', 'url': '/static/kinder_suprise.jpeg'},        
-        {'id': '0003376', 'price': '1.73', 'text': 'Balisto', 'url': '/static/balisto.jpeg'},
-        {'id': '0136673', 'price': '3.21', 'text': 'Koelln Muesli', 'url': '/static/koelln.jpeg'},
-        {'id': '0003430', 'price': '0.58', 'text': 'Jodsalz', 'url': '/static/jodsalz.jpeg'},
-        {'id': '0047627', 'price': '1.56', 'text': 'Pickup', 'url': '/static/pickup.jpeg'}, 
-        {'id': '0001375', 'price': '1.95', 'text': 'Pizza Linsencurry', 'url': '/static/pizza2.jpg'},
-        {'id': '0034957', 'price': '1.87', 'text': 'Calabrese Style', 'url': '/static/pizza3.jpg'},
-        {'id': '0057475', 'price': '2.57', 'text': 'La Mia Grande', 'url': '/static/pizza4.jpg'},
-        {'id': '0098066', 'price': '2.12', 'text': 'Pizza Vegetale', 'url': '/static/pizza5.jpg'},   
-        {'id': '0122344', 'price': '1.98', 'text': 'Papa tonis', 'url': '/static/pizza1.jpg'},
-        {'id': '0410170', 'price': '0.79', 'text': 'Hefe', 'url': '/static/hefe.jpg'},
-        {'id': '0212833', 'price': '7.43', 'text': 'Formil activ', 'url': '/static/formil.png'},
-        {'id': '0826492', 'price': '2.46', 'text': 'Fleischwurst', 'url': '/static/fleischwurst.png'},
-        {'id': '0926460', 'price': '1.23', 'text': 'Vollmilch', 'url': '/static/milch.png'},
-        {'id': '0173628', 'price': '2.50', 'text': 'Tomaten', 'url': '/static/tomaten.jpg'}
-    ]
+
 
     for counter, item in enumerate(pizzas):
         if item['id'] in user_datas[user_id].einkaufszettel:
@@ -160,21 +161,40 @@ def _get_path_for_einkaufszettel(user_location):
 def navigation():
 
     user_location = request.args.get('user_location')
+    item_id = request.args.get('item_id')
     if user_location is not None:
         user_location = eval(user_location)
     else:
         user_location = (850, 60)  # y,x
 
+    #remove item from shopping list if there ist one
+    if item_id is not None:
+        if item_id in user_datas[user_id].einkaufszettel:
+            user_datas[user_id].einkaufszettel.remove(item_id)
 
     coin_list = [(440, 25), (210, 320)]
 
     path_list, item_list = _get_path_for_einkaufszettel(user_location)
     item_locations = [product_locations[id] for id in item_list if id not in ["_user", "_kasse"]]
     print(item_locations)
+    print(item_list)
+    #GET DETAILS
+    for item in pizzas:
+        if item['id'] == item_list[1]:
+            item_name = item['text']
+            item_path = item['url']
+            item_price = item['price']
 
+    if len(item_locations) > 0:
+        redirect = '/navigation?user_location={}&item_id={}'.format(item_locations[0],item_list[1])
+    else:
+        redirect = '/'
+        item_name = "Finished"
+        item_path = ""
+        item_price = ""
 
     svg = build_map(coin_list, user_location, item_locations, path_list)
-    return render_template('navigation.html', svg=svg, user_x = user_location[0], user_y= user_location[1])
+    return render_template('navigation.html', item_name = item_name, item_path=item_path, item_price=item_price, redirect=redirect, svg=svg, user_x = user_location[0], user_y= user_location[1])
 
 
 @app.route('/startseite')
