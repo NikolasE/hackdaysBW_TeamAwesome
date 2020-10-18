@@ -28,7 +28,7 @@ class TestPathPlanning(unittest.TestCase):
         
         # insert dummy node:
         end_id = 3
-        dist_dummy, _ = pp._insert_dummy_node(new_dist, new_path, end_id)
+        dist_dummy = pp._insert_dummy_node(new_dist, end_id)
         indices = pp._get_indices_in_dist(new_dist)
         for i in range(len(positions)):
             self.assertTrue((i+1) in indices)
