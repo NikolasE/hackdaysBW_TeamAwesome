@@ -9,6 +9,8 @@ import numpy as np
 import skimage.io
 import skimage.graph
 import tqdm
+import json
+import os
 
 class Pathplanner:
 
@@ -19,12 +21,39 @@ class Pathplanner:
             map_image_path: file path to a 8bit (!) grayscale (!) image file that holds the map,
                 where "whiter" is more passable
             locations: list of (x,y) tuples that are the locations on the route. first one is start, last one is end.
-                everything in ebtween can be reshuffled by the tsp algorithm.
+                everything in between can be reshuffled by the tsp algorithm.
         """
+        
+        self.cache_path = '/tmp/path_cache.json'
         self.map = np.clip(255 - skimage.io.imread(map_image_path), 1, 255)
         self.product_locations = locations
         self.num_products = len(self.product_locations)
-        self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
+        
+        self.inter_product_distances = list()
+        self.inter_product_paths = dict()
+
+        if not self._load_distance_and_paths():
+            self.inter_product_distances, self.inter_product_paths = self._calculate_inter_product_routes()
+            self._store_distance_and_paths()
+
+    def _load_distance_and_paths(self):
+        if not os.path.exists(self.cache_path):
+            print("No cache file for distances!")
+            return False
+        print("Loading distances and paths from file!")
+        with open(self.cache_path, 'r') as f:
+            data = json.load(f)
+            self.inter_product_distances = data['product_distances']
+            self.inter_product_paths = data['product_paths']
+
+        return True    
+
+    def _store_distance_and_paths(self):
+        print("Storing")
+        with open(self.cache_path, 'w') as f:
+            json.dump({"product_distances": self.inter_product_distances, 
+            "product_paths": self.inter_product_paths}, f)
+
 
     def _calculate_inter_product_routes(self):
         inter_product_distances = []
@@ -40,7 +69,10 @@ class Pathplanner:
 
         inter_product_paths = dict()
         inter_product_distances = []
+
+        ##  tqdm creates a progress bar to show the process of the path computation
         t = tqdm.tqdm(total=(self.num_products*self.num_products)/2 - self.num_products)
+
         for i_start, loc_start in enumerate(product_locations[:-1]):
             i_start += 1
             inter_product_paths[i_start] = dict()
@@ -162,7 +194,7 @@ class Pathplanner:
 
 
 if __name__ == "__main__":
-    pp = Pathplanner('/home/laurenz/Documents/Github/HackdaysBW_TeamAwesome/app/pathplanning/map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
-                                                                                                        (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
+    pp = Pathplanner('map.png', [(850, 60), (100, 212), (150, 212), (190, 212),
+    (300, 437), (700, 212), (650, 112), (700, 112), (999, 400)])
     p, r = pp.get_path((10, 10), [1,2,3], 2)
     pass
