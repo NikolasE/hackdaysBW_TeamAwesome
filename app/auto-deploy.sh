@@ -16,8 +16,10 @@ while true; do
 
     if [[ $NUM_COMMITS_AVAILABLE > 0 ]]; then
 
+        git stash
         git pull --rebase
-
+        git stash pop
+        
         kill $SERVER_PID || true
         ./main.py &
         SERVER_PID=$!
