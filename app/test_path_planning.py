@@ -14,6 +14,18 @@ class TestPathPlanning(unittest.TestCase):
         self.assertTrue(len(indices) == len(positions))
         self.assertTrue(0 not in indices)
 
+    # def test_roll(self):
+    #     positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
+    #     pp = Pathplanner('app/pathplanning/map.png', positions)
+    #     p2 = Pathplanner._roll_route([0,2,3,1], )    
+
+
+    def test_full(self):
+        positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
+        pp = Pathplanner('app/pathplanning/map.png', positions)
+        p, r = pp.get_path((10, 10), [1,2,3], 2)
+        print(p)
+
     def test_add_user_position(self):
         positions = [(850, 60), (100, 212), (150, 212), (190, 212)]
         pp = Pathplanner('app/pathplanning/map.png', positions)
@@ -37,6 +49,8 @@ class TestPathPlanning(unittest.TestCase):
         self.assertTrue(end_id in indices)
         self.assertTrue(pp.user_position_id == 0)
         
+    def test_roll_route(self):
+        pass
 
 
 
