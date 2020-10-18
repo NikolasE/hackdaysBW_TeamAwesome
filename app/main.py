@@ -330,13 +330,13 @@ def whereis():
             return render_template('whereis2.html', svg=svg, redirect=redirect, hidden=hidden, text=text, arrow=0)
 
         if direction > 0:
-            arrow = 180
+            arrow = 0
         elif direction == 0:
             arrow = 90
             user_location = product_locations[list_id_numbers[0]]
             redirect = '/navigation?user_location={}'.format(user_location)
         else:
-            arrow = 0
+            arrow = 180
 
         return render_template('whereis2.html', number=abs(direction), svg = svg, redirect=redirect, hidden=hidden, text=text, arrow=arrow)
 
