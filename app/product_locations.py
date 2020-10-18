@@ -5,8 +5,7 @@ product_locations = {
     # if you change this list, make sure to remove the cached distances file
     # the file is /tmp/path_cache.json
 
-    # "_user": (0, 0),
-    "_kasse": (899, 399),
+    "_kasse": (820, 370),
     "0003376": (730, 110),
     "0116393": (200, 110),
     "0007873": (700, 110),
